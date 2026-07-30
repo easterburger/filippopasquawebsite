@@ -1,0 +1,209 @@
+.bubble-menu {
+  position: fixed;
+  inset: 24px 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 clamp(16px, 3vw, 48px);
+  pointer-events: none;
+  z-index: 50;
+}
+
+.bubble-menu.absolute {
+  position: absolute;
+}
+
+.bubble-menu .bubble {
+  --bubble-size: 52px;
+  width: var(--bubble-size);
+  height: var(--bubble-size);
+  border: 1px solid color-mix(in srgb, #080808 12%, transparent);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #080808;
+  pointer-events: auto;
+  text-decoration: none;
+}
+
+.bubble-menu .bubble:focus-visible,
+.bubble-menu-items .pill-link:focus-visible {
+  outline: 2px solid var(--color-arterial-red);
+  outline-offset: 4px;
+}
+
+.bubble-menu .logo-bubble {
+  width: auto;
+  min-width: 92px;
+  padding: 0 18px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.bubble-menu .logo-content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.bubble-menu .menu-btn {
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+  flex-direction: column;
+}
+
+.bubble-menu .menu-line {
+  width: 25px;
+  height: 2px;
+  border-radius: 2px;
+  display: block;
+  transition:
+    transform 0.3s ease,
+    width 0.3s ease;
+  transform-origin: center;
+}
+
+.bubble-menu .menu-line.short {
+  width: 17px;
+  margin-top: 6px;
+}
+
+.bubble-menu .menu-btn.open .menu-line:first-child {
+  transform: translateY(4px) rotate(45deg);
+}
+
+.bubble-menu .menu-btn.open .menu-line:last-child {
+  width: 25px;
+  transform: translateY(-4px) rotate(-45deg);
+}
+
+.bubble-menu-items {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(8 8 8 / 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  pointer-events: none;
+  z-index: 40;
+}
+
+.bubble-menu-items.absolute {
+  position: absolute;
+}
+
+.bubble-menu-items .pill-list {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 64px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 1500px;
+  pointer-events: auto;
+}
+
+.bubble-menu-items .pill-col {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.bubble-menu-items .pill-link {
+  --pill-bg: #f3efef;
+  --pill-color: #080808;
+  --item-rot: 0deg;
+  --hover-bg: #262525;
+  --hover-color: #fcfcfc;
+  width: 100%;
+  min-height: clamp(120px, 20vh, 210px);
+  padding: 32px 20px;
+  border-radius: 999px;
+  background: var(--pill-bg);
+  color: var(--pill-color);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease;
+  will-change: transform;
+  box-sizing: border-box;
+  overflow: hidden;
+  font-size: clamp(2.2rem, 5.2vw, 5.5rem);
+  font-weight: 700;
+  letter-spacing: -0.065em;
+  line-height: 0.9;
+}
+
+.bubble-menu-items .pill-label {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+@media (min-width: 900px) {
+  .bubble-menu-items .pill-link {
+    transform: rotate(var(--item-rot));
+  }
+
+  .bubble-menu-items .pill-link:hover {
+    transform: rotate(var(--item-rot)) scale(1.025);
+    background: var(--hover-bg);
+    color: var(--hover-color);
+  }
+
+  .bubble-menu-items .pill-link:active {
+    transform: rotate(var(--item-rot)) scale(0.98);
+  }
+}
+
+@media (max-width: 899px) {
+  .bubble-menu {
+    inset: 16px 0 auto;
+  }
+
+  .bubble-menu .bubble {
+    --bubble-size: 48px;
+  }
+
+  .bubble-menu-items {
+    align-items: flex-start;
+    padding-top: 96px;
+    overflow-y: auto;
+  }
+
+  .bubble-menu-items .pill-list {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding-bottom: 32px;
+  }
+
+  .bubble-menu-items .pill-link {
+    min-height: 88px;
+    font-size: clamp(2rem, 11vw, 4.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble-menu .menu-line,
+  .bubble-menu-items .pill-link {
+    transition-duration: 0.01ms;
+  }
+
+  .bubble-menu-items {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgb(8 8 8 / 0.98);
+  }
+}

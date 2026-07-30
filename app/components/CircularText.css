@@ -1,0 +1,31 @@
+.circular-text {
+  width: 154px;
+  height: 154px;
+  position: relative;
+  border-radius: 50%;
+  color: var(--color-bone-white);
+  font-weight: 600;
+  text-align: center;
+  cursor: default;
+  transform-origin: 50% 50%;
+}
+
+.circular-text::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-arterial-red);
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+}
+
+.circular-text span {
+  position: absolute;
+  inset: 0;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  transform-origin: 50% 50%;
+}
