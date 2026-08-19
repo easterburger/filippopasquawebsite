@@ -4,13 +4,13 @@ import test from "node:test";
 
 const templateRoot = new URL("../", import.meta.url);
 
-async function render() {
+async function render(pathname = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
 
   return worker.fetch(
-    new Request("http://localhost/", {
+    new Request(`http://localhost${pathname}`, {
       headers: { accept: "text/html" },
     }),
     {
@@ -25,7 +25,7 @@ async function render() {
   );
 }
 
-test("server-renders the complete portfolio", async () => {
+test("server-renders the hero-only portfolio", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
@@ -33,27 +33,46 @@ test("server-renders the complete portfolio", async () => {
   const html = await response.text();
   assert.match(
     html,
-    /<title>Filippo Pasqua di Bisceglie \| AI Builder<\/title>/i,
+    /<title>Filippo Pasqua \| Student &amp; Software Developer<\/title>/i,
   );
-  assert.match(html, /I BUILD/);
-  assert.match(html, /THINGS THAT THINK/);
-  assert.match(html, /DAWN/);
-  assert.match(html, /TUTTO BENE/);
-  assert.match(html, /ZAYNO/);
-  assert.match(html, /LUMO/);
-  assert.match(html, /Pasqua Wines/);
-  assert.match(html, /id="work"/);
-  assert.match(html, /id="about"/);
-  assert.match(html, /id="experience"/);
-  assert.match(html, /id="contact"/);
-  assert.match(html, /href="https:\/\/dawn-assistant\.vercel\.app\/"/);
-  assert.match(html, /href="https:\/\/tuttobenegame2026\.vercel\.app\/"/);
-  assert.match(html, /href="https:\/\/zaynoai\.vercel\.app\/"/);
-  assert.match(html, /href="\/Filippo-Pasqua-CV\.pdf"/);
+  assert.doesNotMatch(html, /FILIPPO/);
+  assert.match(html, /IB student and software developer from Italy/);
+  assert.match(html, /introduction/i);
+  assert.match(html, /explore/i);
+  // The intro gate title is split into per-word spans by BlurText.
+  assert.match(html, /class="intro-gate"/);
+  assert.match(html, /Hey,/);
+  assert.match(html, /open site/i);
+  assert.doesNotMatch(html, /id="contact"/i);
+  assert.doesNotMatch(html, /CONTACT ME/);
+  assert.doesNotMatch(html, /\/stickers\//);
+  assert.doesNotMatch(html, /I(?:&#x27;|')m a bit older now/);
+  assert.doesNotMatch(html, /filippo-childhood\.webp/);
+  assert.doesNotMatch(html, /FP\s*\/\s*26/);
+  assert.doesNotMatch(html, /id="work"|id="about"|id="experience"/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
 
-test("ships portfolio assets and removes the starter preview", async () => {
+test("server-renders contact as a dedicated page", async () => {
+  const response = await render("/contact");
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
+
+  const html = await response.text();
+  assert.match(html, /<title>Contact Filippo Pasqua<\/title>/i);
+  assert.match(html, /id="contact"/i);
+  assert.match(html, /CONTACT ME/);
+  assert.match(html, /Sign up to Filippo(?:&#x27;|')s updates/i);
+  assert.match(
+    html,
+    /https:\/\/www\.linkedin\.com\/in\/filippo-pasqua-di-bisceglie-24761629a\//,
+  );
+  assert.match(html, /filippo\.pasquadib@gmail\.com/i);
+  assert.match(html, /mailto:filippo\.pasquadib@gmail\.com/i);
+  assert.doesNotMatch(html, /contact-glass-root|data-glass-target/i);
+});
+
+test("preserves the custom assets for later sections", async () => {
   const [page, layout, styles, packageJson] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
@@ -62,19 +81,37 @@ test("ships portfolio assets and removes the starter preview", async () => {
   ]);
 
   assert.match(page, /PortfolioPage/);
-  assert.match(layout, /Filippo Pasqua di Bisceglie \| AI Builder/);
+  assert.match(layout, /Filippo Pasqua \| Student & Software Developer/);
   assert.match(styles, /prefers-reduced-motion:\s*reduce/);
-  assert.match(styles, /--color-arterial-red:\s*#fe1e34/);
-  assert.match(packageJson, /"gsap"/);
+  assert.match(styles, /BTC Diamond Wood/);
+  assert.match(styles, /--blue:\s*#1266ff/);
+  assert.match(styles, /contact-assets\/contact-flowers\.png/);
   assert.match(packageJson, /"motion"/);
+  assert.match(packageJson, /"three"/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 
   await Promise.all([
-    access(new URL("../public/projects/hero-machine.webp", import.meta.url)),
-    access(new URL("../public/projects/dawn.webp", import.meta.url)),
-    access(new URL("../public/projects/tuttobene.webp", import.meta.url)),
-    access(new URL("../public/projects/zayno.webp", import.meta.url)),
-    access(new URL("../public/Filippo-Pasqua-CV.pdf", import.meta.url)),
+    access(
+      new URL(
+        "../public/hero-assets/filippo-childhood.webp",
+        import.meta.url,
+      ),
+    ),
+    access(
+      new URL("../public/hero-assets/filippo-wordmark.png", import.meta.url),
+    ),
+    access(
+      new URL(
+        "../public/fonts/BTCDiamondWoodRegular.woff2",
+        import.meta.url,
+      ),
+    ),
+    access(
+      new URL(
+        "../public/contact-assets/contact-flowers.png",
+        import.meta.url,
+      ),
+    ),
   ]);
 
   await assert.rejects(

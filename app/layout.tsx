@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Inter_Tight, Playfair_Display } from "next/font/google";
 import { headers } from "next/headers";
+
+import { SoundProvider } from "@/components/sound/SoundProvider";
+import SoundToggle from "@/components/sound/SoundToggle";
+
+import { PageTransitionProvider } from "./components/PageTransition";
 import "./globals.css";
 
 const interTight = Inter_Tight({
@@ -13,12 +18,13 @@ const playfair = Playfair_Display({
   variable: "--font-editorial",
   subsets: ["latin"],
   style: ["normal", "italic"],
+  weight: ["400", "700", "900"],
   display: "swap",
 });
 
-const title = "Filippo Pasqua di Bisceglie | AI Builder";
+const title = "Filippo Pasqua | Student & Software Developer";
 const description =
-  "Portfolio of Filippo Pasqua di Bisceglie, a student and solo developer building AI products, internal tools, and interactive experiences.";
+  "Filippo Pasqua is an IB student and software developer from Italy.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
@@ -30,7 +36,6 @@ export async function generateMetadata(): Promise<Metadata> {
     requestHeaders.get("x-forwarded-proto") ??
     (host.startsWith("localhost") ? "http" : "https");
   const metadataBase = new URL(`${protocol}://${host}`);
-  const socialImage = new URL("/og.png", metadataBase).toString();
 
   return {
     metadataBase,
@@ -40,13 +45,11 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       type: "website",
-      images: [{ url: socialImage, width: 1200, height: 630 }],
     },
     twitter: {
-      card: "summary_large_image",
+      card: "summary",
       title,
       description,
-      images: [socialImage],
     },
   };
 }
@@ -59,7 +62,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${interTight.variable} ${playfair.variable}`}>
-        {children}
+        <SoundProvider>
+          <PageTransitionProvider>{children}</PageTransitionProvider>
+          <SoundToggle />
+        </SoundProvider>
       </body>
     </html>
   );

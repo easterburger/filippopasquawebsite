@@ -6,8 +6,11 @@ import {
   useMemo,
   useRef,
   useState,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 import { motion } from "motion/react";
+
+import { useTickSound } from "@/components/sound/SoundProvider";
 
 const styles = {
   wrapper: {
@@ -39,6 +42,11 @@ type DecryptedTextProps = {
   encryptedClassName?: string;
   animateOn?: "view" | "hover" | "inViewHover" | "click";
   clickMode?: "once" | "toggle";
+  /** Soft local scramble radius in px. Only letters near the cursor are affected. */
+  proximityRadius?: number;
+  /** ms between soft proximity ticks */
+  proximitySpeed?: number;
+  onAnimationComplete?: () => void;
 };
 
 export default function DecryptedText({
@@ -54,6 +62,9 @@ export default function DecryptedText({
   encryptedClassName = "",
   animateOn = "hover",
   clickMode = "once",
+  proximityRadius,
+  proximitySpeed = 90,
+  onAnimationComplete,
 }: DecryptedTextProps) {
   const [displayText, setDisplayText] = useState(text);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -63,18 +74,60 @@ export default function DecryptedText({
   const [hasAnimated, setHasAnimated] = useState(false);
   const [isDecrypted, setIsDecrypted] = useState(animateOn !== "click");
   const [direction, setDirection] = useState<"forward" | "reverse">("forward");
+  const [proximityOverrides, setProximityOverrides] = useState<
+    Record<number, string>
+  >({});
 
   const containerRef = useRef<HTMLSpanElement | null>(null);
+  const charRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const orderRef = useRef<number[]>([]);
   const pointerRef = useRef(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const proximityIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
+  const pointerPosRef = useRef<{ x: number; y: number } | null>(null);
+  const onCompleteRef = useRef(onAnimationComplete);
+  // Chatter while glyphs churn. The proximity tick is slower and driven by
+  // pointer movement, so resting the cursor over the text stays silent.
+  const scrambleTick = useTickSound("teletype", 85);
+  const proximityTick = useTickSound("teletype", 140);
+
+  useEffect(() => {
+    onCompleteRef.current = onAnimationComplete;
+  }, [onAnimationComplete]);
 
   const availableChars = useMemo(
     () =>
       useOriginalCharsOnly
-        ? Array.from(new Set(text.split(""))).filter((character) => character !== " ")
+        ? Array.from(new Set(text.split(""))).filter(
+            (character) => character !== " ",
+          )
         : characters.split(""),
     [useOriginalCharsOnly, text, characters],
+  );
+
+  const pickScrambleChar = useCallback(
+    (original: string) => {
+      const pool =
+        availableChars.length > 0
+          ? availableChars
+          : original.toLowerCase() === original
+            ? "aeioumnrlst"
+            : "AEIOUMNRLST";
+      let next = pool[Math.floor(Math.random() * pool.length)] ?? original;
+      // Prefer same case for a softer look
+      if (original !== " " && /[A-Z]/.test(original)) {
+        next = next.toUpperCase();
+      } else if (/[a-z]/.test(original)) {
+        next = next.toLowerCase();
+      }
+      return next === original
+        ? (pool[(Math.floor(Math.random() * pool.length) + 1) % pool.length] ??
+            original)
+        : next;
+    },
+    [availableChars],
   );
 
   const shuffleText = useCallback(
@@ -84,13 +137,10 @@ export default function DecryptedText({
         .map((character, index) => {
           if (character === " ") return " ";
           if (currentRevealed.has(index)) return originalText[index];
-          return (
-            availableChars[Math.floor(Math.random() * availableChars.length)] ??
-            character
-          );
+          return pickScrambleChar(character);
         })
         .join(""),
-    [availableChars],
+    [pickScrambleChar],
   );
 
   const computeOrder = useCallback(
@@ -149,6 +199,7 @@ export default function DecryptedText({
       orderRef.current = computeOrder(text.length);
       pointerRef.current = 0;
     }
+    setProximityOverrides({});
     setRevealedIndices(new Set());
     setDirection("forward");
     setIsAnimating(true);
@@ -171,6 +222,7 @@ export default function DecryptedText({
     let currentIteration = 0;
 
     intervalRef.current = setInterval(() => {
+      scrambleTick();
       setRevealedIndices((previousRevealed) => {
         if (sequential && direction === "forward") {
           if (previousRevealed.size < text.length) {
@@ -207,6 +259,7 @@ export default function DecryptedText({
             setIsAnimating(false);
             setDisplayText(text);
             setIsDecrypted(true);
+            onCompleteRef.current?.();
           }
           return previousRevealed;
         }
@@ -235,6 +288,7 @@ export default function DecryptedText({
         if (intervalRef.current) clearInterval(intervalRef.current);
         setIsAnimating(false);
         setIsDecrypted(direction === "forward");
+        if (direction === "forward") onCompleteRef.current?.();
         return previousRevealed;
       });
     }, speed);
@@ -253,6 +307,7 @@ export default function DecryptedText({
     fillAllIndices,
     removeRandomIndices,
     computeOrder,
+    scrambleTick,
   ]);
 
   const handleClick = () => {
@@ -266,13 +321,13 @@ export default function DecryptedText({
   };
 
   const triggerHoverDecrypt = useCallback(() => {
-    if (isAnimating) return;
+    if (isAnimating || proximityRadius) return;
     setRevealedIndices(new Set());
     setIsDecrypted(false);
     setDisplayText(text);
     setDirection("forward");
     setIsAnimating(true);
-  }, [isAnimating, text]);
+  }, [isAnimating, text, proximityRadius]);
 
   const resetToPlainText = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -281,7 +336,90 @@ export default function DecryptedText({
     setDisplayText(text);
     setIsDecrypted(true);
     setDirection("forward");
+    setProximityOverrides({});
   }, [text]);
+
+  const clearProximity = useCallback(() => {
+    pointerPosRef.current = null;
+    if (proximityIntervalRef.current) {
+      clearInterval(proximityIntervalRef.current);
+      proximityIntervalRef.current = null;
+    }
+    setProximityOverrides({});
+  }, []);
+
+  const tickProximity = useCallback(() => {
+    const pointer = pointerPosRef.current;
+    const radius = proximityRadius;
+    if (!pointer || !radius) {
+      setProximityOverrides({});
+      return;
+    }
+
+    setProximityOverrides((previous) => {
+      const next: Record<number, string> = {};
+
+      charRefs.current.forEach((element, index) => {
+        const original = text[index];
+        if (!element || !original || original === " ") return;
+
+        const rect = element.getBoundingClientRect();
+        const distance = Math.hypot(
+          pointer.x - (rect.left + rect.width / 2),
+          pointer.y - (rect.top + rect.height / 2),
+        );
+
+        if (distance >= radius) return;
+
+        const falloff = 1 - distance / radius;
+        const existing = previous[index];
+
+        // Soft: keep a light local haze, only occasionally flip glyphs
+        if (existing && Math.random() > falloff * 0.55) {
+          next[index] = existing;
+          return;
+        }
+
+        if (Math.random() > falloff * 0.38) return;
+        next[index] = pickScrambleChar(original);
+      });
+
+      return next;
+    });
+  }, [pickScrambleChar, proximityRadius, text]);
+
+  const handlePointerMove = useCallback(
+    (event: ReactPointerEvent<HTMLSpanElement>) => {
+      if (!proximityRadius || isAnimating || !isDecrypted) return;
+
+      pointerPosRef.current = { x: event.clientX, y: event.clientY };
+      proximityTick();
+
+      if (!proximityIntervalRef.current) {
+        tickProximity();
+        proximityIntervalRef.current = setInterval(
+          tickProximity,
+          proximitySpeed,
+        );
+      }
+    },
+    [
+      isAnimating,
+      isDecrypted,
+      proximityRadius,
+      proximitySpeed,
+      tickProximity,
+      proximityTick,
+    ],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (proximityIntervalRef.current) {
+        clearInterval(proximityIntervalRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (animateOn !== "view" && animateOn !== "inViewHover") return;
@@ -313,20 +451,36 @@ export default function DecryptedText({
       }
       setRevealedIndices(new Set());
       setDirection("forward");
+      setProximityOverrides({});
     });
 
     return () => window.cancelAnimationFrame(frame);
   }, [animateOn, text, encryptInstantly]);
 
-  const animateProps =
-    animateOn === "hover" || animateOn === "inViewHover"
-      ? {
-          onMouseEnter: triggerHoverDecrypt,
-          onMouseLeave: resetToPlainText,
-        }
-      : animateOn === "click"
-        ? { onClick: handleClick }
+  const useFullHover =
+    !proximityRadius &&
+    (animateOn === "hover" || animateOn === "inViewHover");
+
+  const animateProps = useFullHover
+    ? {
+        onMouseEnter: triggerHoverDecrypt,
+        onMouseLeave: resetToPlainText,
+      }
+    : animateOn === "click"
+      ? { onClick: handleClick }
+      : proximityRadius
+        ? {
+            onPointerMove: handlePointerMove,
+            onPointerLeave: clearProximity,
+          }
         : {};
+
+  const visibleText = displayText.split("").map((character, index) => {
+    if (proximityOverrides[index] !== undefined) {
+      return proximityOverrides[index];
+    }
+    return character;
+  });
 
   return (
     <motion.span
@@ -337,14 +491,22 @@ export default function DecryptedText({
     >
       <span style={styles.srOnly}>{text}</span>
       <span aria-hidden="true">
-        {displayText.split("").map((character, index) => {
+        {visibleText.map((character, index) => {
+          const isProximityScrambled = proximityOverrides[index] !== undefined;
           const isRevealedOrDone =
             revealedIndices.has(index) || (!isAnimating && isDecrypted);
 
           return (
             <span
-              key={`${index}-${character}`}
-              className={isRevealedOrDone ? className : encryptedClassName}
+              key={index}
+              ref={(node) => {
+                charRefs.current[index] = node;
+              }}
+              className={
+                isProximityScrambled || !isRevealedOrDone
+                  ? encryptedClassName
+                  : className
+              }
             >
               {character}
             </span>

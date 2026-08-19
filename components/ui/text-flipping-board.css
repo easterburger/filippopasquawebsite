@@ -1,0 +1,190 @@
+.text-flipping-board {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(8px, 1.2vw, 16px);
+  border: 1px solid rgb(24 27 32 / 0.52);
+  border-radius: 12px;
+  background: #c9c6be;
+}
+
+.flap-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--flap-cols, 22), minmax(0, 1fr));
+  gap: clamp(1px, 0.2vw, 3px);
+}
+
+.flap-cell,
+.flap-color-cell {
+  container-type: inline-size;
+  aspect-ratio: 1 / 2.55;
+  overflow: hidden;
+  border: 1px solid rgb(24 27 32 / 0.24);
+  border-radius: 3px;
+}
+
+.flap-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.flap-character {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  perspective: 700px;
+  transform-style: preserve-3d;
+}
+
+.flap-pin-line {
+  position: absolute;
+  top: 50%;
+  right: -1px;
+  left: -1px;
+  z-index: 40;
+  height: 1px;
+  background: rgb(24 27 32 / 0.3);
+}
+
+.flap-static,
+.flap-moving {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: calc(50% - 0.5px);
+  overflow: hidden;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+.flap-static-top,
+.flap-moving-top {
+  top: 0;
+  border-radius: 2px 2px 0 0;
+}
+
+.flap-static-bottom,
+.flap-moving-bottom {
+  bottom: 0;
+  border-radius: 0 0 2px 2px;
+}
+
+.flap-moving {
+  z-index: 10;
+}
+
+.flap-moving-top {
+  transform-origin: bottom;
+}
+
+.flap-moving-bottom {
+  transform-origin: top;
+}
+
+.flap-glyph {
+  position: absolute;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200%;
+  overflow: hidden;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    monospace;
+  font-size: 58cqw;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  user-select: none;
+}
+
+.flap-glyph-top {
+  top: 0;
+}
+
+.flap-glyph-bottom {
+  bottom: 0;
+}
+
+.flap-flash,
+.flap-top-shadow,
+.flap-bottom-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.flap-flash {
+  background: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.75),
+    transparent 64%
+  );
+}
+
+.flap-top-shadow {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgb(24 27 32 / 0.65)
+  );
+}
+
+.flap-bottom-shine {
+  background: linear-gradient(
+    to top,
+    transparent,
+    rgb(255 255 255 / 0.55)
+  );
+}
+
+.flap-split-line {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  z-index: 20;
+  height: 1px;
+  transform: translateY(-0.5px);
+  background: rgb(24 27 32 / 0.42);
+  pointer-events: none;
+}
+
+.flap-stripes {
+  width: 100%;
+  height: clamp(3px, 0.75vw, 10px);
+  background: repeating-linear-gradient(
+    to bottom,
+    rgb(24 27 32 / 0.28) 0,
+    rgb(24 27 32 / 0.28) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+@media (max-width: 620px) {
+  .text-flipping-board {
+    padding: 7px;
+    border-radius: 10px;
+  }
+
+  .flap-grid {
+    gap: 2px;
+  }
+
+  .flap-cell,
+  .flap-color-cell {
+    aspect-ratio: 1 / 1.42;
+    border-radius: 3px;
+  }
+
+  .flap-glyph {
+    font-size: 64cqw;
+  }
+
+  .flap-stripes {
+    height: 3px;
+  }
+}

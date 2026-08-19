@@ -1,75 +1,155 @@
 .bubble-menu {
-  position: fixed;
-  inset: 24px 0 auto;
+  --bubble-size: 48px;
+  left: 0;
+  right: 0;
+  top: 2em;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 0 clamp(16px, 3vw, 48px);
+  padding: 0 2em;
   pointer-events: none;
-  z-index: 50;
+  z-index: 99;
+}
+
+.bubble-menu.fixed {
+  position: fixed;
 }
 
 .bubble-menu.absolute {
   position: absolute;
 }
 
+.bubble-menu.no-logo {
+  justify-content: flex-end;
+}
+
+.bubble-menu-end {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
 .bubble-menu .bubble {
-  --bubble-size: 52px;
   width: var(--bubble-size);
   height: var(--bubble-size);
-  border: 1px solid color-mix(in srgb, #080808 12%, transparent);
-  border-radius: 999px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #080808;
   pointer-events: auto;
-  text-decoration: none;
 }
 
-.bubble-menu .bubble:focus-visible,
-.bubble-menu-items .pill-link:focus-visible {
-  outline: 2px solid var(--color-arterial-red);
-  outline-offset: 4px;
+.bubble-menu .logo-bubble,
+.bubble-menu .toggle-bubble {
+  will-change: transform;
+}
+
+.bubble-menu .toggle-bubble.menu-btn {
+  opacity: 0;
+  transform: translateY(-12px);
+  filter: blur(10px);
+  pointer-events: none;
+  transition:
+    opacity 520ms cubic-bezier(0.16, 1, 0.3, 1) 80ms,
+    transform 520ms cubic-bezier(0.16, 1, 0.3, 1) 80ms,
+    filter 520ms cubic-bezier(0.16, 1, 0.3, 1) 80ms;
+}
+
+.bubble-menu.is-ready .toggle-bubble.menu-btn {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+  pointer-events: auto;
+}
+
+.bubble-menu-glass .toggle-bubble.menu-btn {
+  border: 1px solid rgb(255 255 255 / 0.48);
+  background: rgb(245 244 232 / 0.22);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.62),
+    0 18px 48px rgb(7 28 19 / 0.2);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+}
+
+.bubble-menu-glass .toggle-bubble.menu-btn:hover,
+.bubble-menu-glass .toggle-bubble.menu-btn:focus-visible {
+  border-color: rgb(255 255 255 / 0.72);
+  background: rgb(245 244 232 / 0.34);
+}
+
+.bubble-menu-glass .menu-line {
+  background: #f9f5e8 !important;
 }
 
 .bubble-menu .logo-bubble {
   width: auto;
-  min-width: 92px;
-  padding: 0 18px;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: -0.04em;
+  min-height: var(--bubble-size);
+  height: var(--bubble-size);
+  padding: 0 16px;
+  border-radius: calc(var(--bubble-size) / 2);
+  gap: 8px;
+}
+
+.bubble-menu .toggle-bubble {
+  width: var(--bubble-size);
+  height: var(--bubble-size);
+  flex-shrink: 0;
+}
+
+.bubble-menu .bubble-logo {
+  max-height: 60%;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .bubble-menu .logo-content {
+  --logo-max-height: 60%;
+  --logo-max-width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 120px;
   height: 100%;
 }
 
+.bubble-menu .logo-content > .bubble-logo,
+.bubble-menu .logo-content > img,
+.bubble-menu .logo-content > svg {
+  max-height: var(--logo-max-height);
+  max-width: var(--logo-max-width);
+}
+
 .bubble-menu .menu-btn {
-  border: 0;
+  border: none;
+  background: #fff;
   cursor: pointer;
-  padding: 0;
+  display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .bubble-menu .menu-line {
-  width: 25px;
+  width: 26px;
   height: 2px;
+  background: #111;
   border-radius: 2px;
   display: block;
+  margin: 0 auto;
   transition:
     transform 0.3s ease,
-    width 0.3s ease;
+    opacity 0.3s ease;
   transform-origin: center;
 }
 
-.bubble-menu .menu-line.short {
-  width: 17px;
+.bubble-menu .menu-line + .menu-line {
   margin-top: 6px;
 }
 
@@ -78,54 +158,109 @@
 }
 
 .bubble-menu .menu-btn.open .menu-line:last-child {
-  width: 25px;
   transform: translateY(-4px) rotate(-45deg);
 }
 
+@media (min-width: 768px) {
+  .bubble-menu {
+    --bubble-size: 56px;
+  }
+
+  .bubble-menu .logo-bubble {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 620px) {
+  .bubble-menu-end {
+    gap: 8px;
+  }
+}
+
 .bubble-menu-items {
-  position: fixed;
+  position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgb(8 8 8 / 0.88);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  pointer-events: none;
-  z-index: 40;
+  overflow: hidden;
+  pointer-events: auto;
+  z-index: 98;
+}
+
+.bubble-menu-items.fixed {
+  position: fixed;
 }
 
 .bubble-menu-items.absolute {
   position: absolute;
 }
 
-.bubble-menu-items .pill-list {
-  list-style: none;
-  margin: 0 auto;
-  padding: 0 clamp(16px, 4vw, 64px);
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  width: 100%;
-  max-width: 1500px;
-  pointer-events: auto;
+.bubble-menu-curtain {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--ink, #181b20);
+  cursor: pointer;
+  will-change: transform, opacity;
 }
 
-.bubble-menu-items .pill-col {
+.bubble-menu-items .pill-list {
+  position: relative;
+  z-index: 1;
+  list-style: none;
+  margin: 0;
+  padding: 108px 24px 34px;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(2px, 0.35vw, 7px);
+  width: 100%;
+  max-width: 1540px;
+  margin-left: auto;
+  margin-right: auto;
+  pointer-events: auto;
+  justify-content: stretch;
+}
+
+.bubble-menu-items .pill-list .pill-spacer {
+  width: 100%;
+  height: 0;
+  pointer-events: none;
+}
+
+.bubble-menu-items .pill-list .pill-col {
   display: flex;
   justify-content: center;
   align-items: stretch;
+  box-sizing: border-box;
+  grid-column: span 2;
+}
+
+.bubble-menu-items .pill-list .pill-col:nth-child(4) {
+  grid-column: 2 / span 2;
+}
+
+.bubble-menu-items .pill-list .pill-col:nth-child(5) {
+  grid-column: 4 / span 2;
 }
 
 .bubble-menu-items .pill-link {
-  --pill-bg: #f3efef;
-  --pill-color: #080808;
+  --pill-bg: #ffffff;
+  --pill-color: #111;
   --item-rot: 0deg;
-  --hover-bg: #262525;
-  --hover-color: #fcfcfc;
+  --pill-min-h: clamp(250px, 34vh, 340px);
+  --hover-bg: #f3f4f6;
+  --hover-color: #111;
   width: 100%;
-  min-height: clamp(120px, 20vh, 210px);
-  padding: 32px 20px;
+  min-height: var(--pill-min-h);
+  padding: clamp(2rem, 4.2vw, 5rem) clamp(1rem, 2vw, 2.5rem);
+  border: 1px solid rgb(255 255 255 / 0.2);
+  font-family: var(--font-primary), Arial, sans-serif;
+  font-size: clamp(2.4rem, 4.4vw, 5.5rem);
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: -0.055em;
+  line-height: 0.92;
   border-radius: 999px;
   background: var(--pill-bg);
   color: var(--pill-color);
@@ -135,21 +270,12 @@
   justify-content: center;
   position: relative;
   transition:
-    background 0.25s ease,
-    color 0.25s ease,
-    transform 0.25s ease;
+    background 0.3s ease,
+    color 0.3s ease;
   will-change: transform;
   box-sizing: border-box;
+  white-space: nowrap;
   overflow: hidden;
-  font-size: clamp(2.2rem, 5.2vw, 5.5rem);
-  font-weight: 700;
-  letter-spacing: -0.065em;
-  line-height: 0.9;
-}
-
-.bubble-menu-items .pill-label {
-  display: inline-block;
-  will-change: transform, opacity;
 }
 
 @media (min-width: 900px) {
@@ -158,52 +284,106 @@
   }
 
   .bubble-menu-items .pill-link:hover {
-    transform: rotate(var(--item-rot)) scale(1.025);
+    transform: rotate(var(--item-rot)) scale(1.035);
     background: var(--hover-bg);
     color: var(--hover-color);
   }
 
   .bubble-menu-items .pill-link:active {
-    transform: rotate(var(--item-rot)) scale(0.98);
+    transform: rotate(var(--item-rot)) scale(0.94);
   }
 }
 
+.bubble-menu-items .pill-link .pill-label {
+  position: relative;
+  display: inline-block;
+  will-change: transform, opacity;
+  line-height: 0.92;
+}
+
+.bubble-menu-items .pill-label-default {
+  display: inline-block;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 220ms ease,
+    transform 360ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bubble-menu-items .pill-label::after {
+  content: attr(data-label);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max-content;
+  font-family: var(--font-editorial), Georgia, "Times New Roman", serif;
+  font-size: 1.1em;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.075em;
+  line-height: 0.88;
+  opacity: 0;
+  transform: translate(-50%, calc(-50% + 24px));
+  transition:
+    opacity 220ms ease,
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bubble-menu-items .pill-link:hover .pill-label-default,
+.bubble-menu-items .pill-link:focus-visible .pill-label-default {
+  opacity: 0;
+  transform: translateY(-22px);
+}
+
+.bubble-menu-items .pill-link:hover .pill-label::after,
+.bubble-menu-items .pill-link:focus-visible .pill-label::after {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+
 @media (max-width: 899px) {
-  .bubble-menu {
-    inset: 16px 0 auto;
-  }
-
-  .bubble-menu .bubble {
-    --bubble-size: 48px;
-  }
-
   .bubble-menu-items {
     align-items: flex-start;
-    padding-top: 96px;
     overflow-y: auto;
   }
 
   .bubble-menu-items .pill-list {
     grid-template-columns: 1fr;
-    gap: 12px;
-    padding-bottom: 32px;
+    row-gap: 7px;
+    padding: 104px 16px 28px;
+  }
+
+  .bubble-menu-items .pill-list .pill-col {
+    grid-column: 1 !important;
+    margin-left: 0 !important;
+    overflow: visible;
   }
 
   .bubble-menu-items .pill-link {
-    min-height: 88px;
-    font-size: clamp(2rem, 11vw, 4.5rem);
+    min-height: clamp(86px, 14svh, 120px);
+    padding: 1.15rem 1rem;
+    font-size: clamp(2.25rem, 9vw, 4.25rem);
+    border-radius: 999px;
+  }
+
+  .bubble-menu-items .pill-link:hover {
+    transform: scale(1.025);
+    background: var(--hover-bg);
+    color: var(--hover-color);
+  }
+
+  .bubble-menu-items .pill-link:active {
+    transform: scale(0.94);
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .bubble-menu .menu-line,
-  .bubble-menu-items .pill-link {
-    transition-duration: 0.01ms;
-  }
+.bubble-menu .bubble:focus-visible,
+.bubble-menu-items .pill-link:focus-visible {
+  outline: 3px solid #1266ff;
+  outline-offset: 4px;
+}
 
-  .bubble-menu-items {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    background: rgb(8 8 8 / 0.98);
-  }
+.bubble-menu .logo-bubble {
+  color: #181b20;
+  text-decoration: none;
 }
