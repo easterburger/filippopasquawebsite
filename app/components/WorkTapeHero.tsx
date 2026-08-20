@@ -8,7 +8,6 @@ import { usePageTransition } from "./PageTransition";
 import WorkSpinner from "./WorkSpinner";
 
 const PAGE_TITLE = "Software Projects and Work Experience";
-const MARK = "✦";
 const INK = "rgba(242, 246, 236, 0.96)";
 const INK_SOFT = "rgba(242, 246, 236, 0.62)";
 const HAIRLINE = "rgba(242, 246, 236, 0.44)";
@@ -33,6 +32,27 @@ const badges = [
 // shift, with the tail hooking off the bottom-left corner.
 const BUBBLE_TOP = "#87b5ff";
 const BUBBLE_BOTTOM = "#1f69ee";
+
+function drawSparkle(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  size: number,
+) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.beginPath();
+  ctx.moveTo(0, -size);
+  for (let i = 0; i < 4; i++) {
+    const tip = (i * Math.PI) / 2;
+    const mid = tip + Math.PI / 4;
+    ctx.lineTo(Math.sin(tip) * size, -Math.cos(tip) * size);
+    ctx.lineTo(Math.sin(mid) * size * 0.22, -Math.cos(mid) * size * 0.22);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
@@ -164,15 +184,13 @@ export default function WorkTapeHero() {
 
         const gap = Math.min(Math.max(26, width * 0.034), 64);
         const titleFont = `600 ${fontSize}px ${family}`;
-        const markFont = `600 ${Math.round(fontSize * 0.3)}px ${family}`;
+        const markSize = Math.max(8, fontSize * 0.16);
 
         ctx.textBaseline = "middle";
         ctx.letterSpacing = `${(-0.032 * fontSize).toFixed(2)}px`;
         ctx.font = titleFont;
         const titleWidth = ctx.measureText(PAGE_TITLE).width;
-        ctx.font = markFont;
-        const markWidth = ctx.measureText(MARK).width;
-        const itemWidth = titleWidth + markWidth + gap * 2;
+        const itemWidth = titleWidth + markSize * 2 + gap * 2;
         const centerY = rect.top + rect.height / 2 + fontSize * 0.05;
 
         let x = -((time * SCROLL_SPEED) % itemWidth);
@@ -180,9 +198,13 @@ export default function WorkTapeHero() {
           ctx.font = titleFont;
           ctx.fillStyle = INK;
           ctx.fillText(PAGE_TITLE, x, centerY);
-          ctx.font = markFont;
           ctx.fillStyle = INK_SOFT;
-          ctx.fillText(MARK, x + titleWidth + gap, centerY - fontSize * 0.02);
+          drawSparkle(
+            ctx,
+            x + titleWidth + gap + markSize,
+            centerY,
+            markSize,
+          );
           x += itemWidth;
         }
         ctx.letterSpacing = "0px";

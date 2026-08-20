@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter_Tight, Playfair_Display } from "next/font/google";
 import { headers } from "next/headers";
 
@@ -21,6 +21,12 @@ const playfair = Playfair_Display({
   weight: ["400", "700", "900"],
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 const title = "Filippo Pasqua | Student & Software Developer";
 const description =

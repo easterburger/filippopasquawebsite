@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 
 import BlurText from "./BlurText";
+import HeroActionMark from "./HeroActionMark";
 import { MeltLayer, useMeltFill } from "./melt-fill";
 
 const SOFT_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -96,9 +97,7 @@ export default function IntroGate({ onEnter }: IntroGateProps) {
             <span className="hero-action-label" data-label="open site">
               <span className="hero-action-default">open site</span>
             </span>
-            <span className="hero-action-mark" data-mark="↓" aria-hidden="true">
-              <span className="hero-action-mark-default">↓</span>
-            </span>
+            <HeroActionMark kind="down" />
           </button>
 
           {showAction && !isLeaving && (

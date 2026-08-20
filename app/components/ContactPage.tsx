@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowUpRight } from "@phosphor-icons/react";
 import { useState } from "react";
 
 import BubbleMenu from "./BubbleMenu";
@@ -129,7 +130,7 @@ export default function ContactPage() {
               height={68}
               cornerRadius={19}
               borderWidth={1.25}
-              fontSize={15}
+              fontSize={16}
               backgroundColor="rgba(250, 248, 239, 0.88)"
               textColor="#12221a"
               placeholderColor="#66736b"
@@ -181,7 +182,7 @@ export default function ContactPage() {
                 </button>
                 <a href={`mailto:${CONTACT_EMAIL}`}>
                   <span>send email</span>
-                  <span aria-hidden="true">↗</span>
+                  <ArrowUpRight aria-hidden="true" weight="bold" size={14} />
                 </a>
               </div>
             </details>

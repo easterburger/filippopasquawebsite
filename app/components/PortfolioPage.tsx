@@ -8,6 +8,7 @@ import TextFlippingBoardDemo from "@/components/text-flipping-board-demo";
 import BlurText from "./BlurText";
 import BubbleMenu from "./BubbleMenu";
 import DecryptedText from "./DecryptedText";
+import HeroActionMark from "./HeroActionMark";
 import IntroGate from "./IntroGate";
 import ParticleButton from "./ParticleButton";
 import StyleNote from "./StyleNote";
@@ -147,13 +148,7 @@ export default function PortfolioPage() {
                   <span className="hero-action-label" data-label="introduction">
                     <span className="hero-action-default">introduction</span>
                   </span>
-                  <span
-                    className="hero-action-mark"
-                    data-mark="✦"
-                    aria-hidden="true"
-                  >
-                    <span className="hero-action-mark-default">✦</span>
-                  </span>
+                  <HeroActionMark kind="spark" />
                 </ParticleButton>
 
                 <button
@@ -167,13 +162,7 @@ export default function PortfolioPage() {
                   <span className="hero-action-label" data-label="explore">
                     <span className="hero-action-default">explore</span>
                   </span>
-                  <span
-                    className="hero-action-mark"
-                    data-mark="↗"
-                    aria-hidden="true"
-                  >
-                    <span className="hero-action-mark-default">↗</span>
-                  </span>
+                  <HeroActionMark kind="explore" />
                 </button>
               </motion.div>
             </div>
