@@ -1,6 +1,7 @@
 import vinext from "vinext";
 import { defineConfig, type PluginOption } from "vite";
 import hostingConfig from "./.openai/hosting.json";
+import { fixVinextFontUrls } from "./build/fix-vinext-font-urls";
 import { sites } from "./build/sites-vite-plugin";
 
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
@@ -41,7 +42,7 @@ export default defineConfig(async () => {
   process.env.WRANGLER_LOG_PATH ??= ".wrangler/logs";
   process.env.MINIFLARE_REGISTRY_PATH ??= ".wrangler/registry";
 
-  const plugins: PluginOption[] = [vinext(), sites()];
+  const plugins: PluginOption[] = [vinext(), sites(), fixVinextFontUrls()];
 
   if (isVercel) {
     const { nitro } = await import("nitro/vite");
