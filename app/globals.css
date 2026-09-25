@@ -2644,7 +2644,8 @@ img {
 }
 
 .openbook-cover-front .bookcover {
-  font-size: calc(var(--bw) / 14);
+  /* Sized by the tighter side, so a wide landscape page keeps the art whole. */
+  font-size: min(calc(var(--bw) / 14), calc(var(--bh) / 20));
 }
 
 .bookcover img {
@@ -3171,6 +3172,15 @@ img {
 .openbook-page-swap {
   position: absolute;
   inset: 0;
+}
+
+/* The open spread for screen readers (the 3D stage is aria-hidden). */
+.openbook-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 
 .openbook-pager {

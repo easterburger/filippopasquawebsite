@@ -43,7 +43,7 @@ import "./experience.css";
 
 // A record crate: sleeves along the top, one giant word that takes on each
 // record's colours, and a player that slides the vinyl out into its story.
-// Experience and Education are both crates, each with its own collection.
+// Each page that uses it passes its own collection.
 
 const loud = Anton({
   weight: "400",
@@ -788,8 +788,8 @@ export default function RecordCrate<Id extends MusicTrackId>({
     window.history.replaceState(null, "", `#${releases[openIndex].id}`);
   }, [openIndex, releases]);
 
-  // Deep links (/experience#dawn, /education#oxford, and the old
-  // /work/projects#dawn) play that record once the crate has landed.
+  // Deep links (/experience#dawn, and the old /work/projects#dawn) play that
+  // record once the crate has landed.
   useEffect(() => {
     const hash = window.location.hash.slice(1);
     const id = hashAliases?.[hash] ?? hash;

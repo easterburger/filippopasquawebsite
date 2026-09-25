@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 
 import type { MusicTrackId } from "./record-music";
 
-// Shared by every record crate (Experience, Education): a crate is a list of
-// records, a long-form story for each, and a few words about the page.
+// A record crate is a list of records, a long-form story for each, and a few
+// words about the page. Experience is one.
 
 export type Release<Id extends MusicTrackId = MusicTrackId> = {
   /** Also picks the record's music loop and its deep link (#id). */

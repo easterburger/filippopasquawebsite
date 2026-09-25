@@ -1,4 +1,4 @@
-// Background music for the record crates (Experience and Education): one loop per record,
+// Background music for the Experience records: one loop per record,
 // synthesised note by note with Web Audio. No samples and no downloads, so
 // every sound is original and free to use.
 //
@@ -6,19 +6,12 @@
 // turning effects off suspends that context, and the music has its own switch.
 
 export type MusicTrackId =
-  // Experience
   | "skycloud"
   | "dawn"
   | "zayno"
   | "lumostudio"
   | "bds"
-  | "pasqua"
-  // Education
-  | "ib"
-  | "varsity"
-  | "clubs"
-  | "oxford"
-  | "nph";
+  | "pasqua";
 
 const MUSIC_GAIN = 0.5;
 const FADE_IN = 0.9;
@@ -338,62 +331,6 @@ const PASQUA_MELODY: Array<Array<[number, number]>> = [
 ];
 const BOSSA = [0, 3, 6, 10, 12];
 
-const IB_CHORDS = [
-  [57, 60, 64, 71], // Am(add9)
-  [53, 57, 60, 64], // Fmaj7
-  [48, 55, 60, 64], // C
-  [55, 59, 62, 67], // G
-];
-const IB_ROOTS = [33, 29, 36, 31];
-
-const VARSITY_CHORDS = [
-  [60, 64, 67], // C
-  [65, 69, 72], // F
-  [67, 71, 74], // G
-  [60, 64, 67], // C
-];
-const VARSITY_ROOTS = [36, 41, 43, 36];
-// [step, note, length in 16ths]
-const VARSITY_RIFF: Array<Array<[number, number, number]>> = [
-  [[0, 72, 2], [2, 76, 2], [4, 79, 4], [10, 76, 2], [12, 79, 4]],
-  [[0, 81, 3], [4, 79, 2], [6, 77, 2], [8, 76, 4], [12, 72, 4]],
-  [[0, 74, 2], [2, 79, 2], [4, 83, 4], [10, 81, 2], [12, 79, 4]],
-  [[0, 84, 6], [8, 79, 2], [10, 76, 2], [12, 72, 4]],
-];
-
-const NIGHT_CHORDS = [
-  [48, 55, 59, 62, 66], // Cmaj9#11
-  [45, 52, 55, 59, 60], // Am7(add9)
-  [41, 48, 52, 55, 57], // Fmaj9
-  [43, 50, 54, 57, 62], // G lydian
-];
-const NIGHT_ROOTS = [36, 33, 29, 31];
-const STARS = [79, 83, 86, 88, 91, 86, 84, 81];
-const TWINKLE = [0, 5, 7, 10, 13];
-
-// The canon progression (Pachelbel, 1680s, long in the public domain).
-const OXFORD_CHORDS = [
-  [62, 66, 69], // D
-  [61, 64, 69], // A
-  [59, 62, 66], // Bm
-  [61, 66, 69], // F#m
-  [59, 62, 67], // G
-  [62, 66, 69], // D
-  [59, 62, 67], // G
-  [61, 64, 69], // A
-];
-const OXFORD_ROOTS = [38, 33, 35, 30, 31, 38, 31, 33];
-const OXFORD_TUNE = [78, 76, 74, 73, 71, 69, 71, 73];
-
-const NPH_CHORDS = [
-  [57, 60, 64], // Am
-  [55, 59, 62], // G
-  [53, 57, 60], // F
-  [52, 56, 59], // E
-];
-const NPH_ROOTS = [45, 43, 41, 40];
-const REQUINTO = [3, 2, 1, 2, 0, 1, 2, 3];
-
 const TRACKS: Record<MusicTrackId, Track> = {
   // Lo-fi sunrise: lazy electric piano, brushed kit, a melody in the back half.
   dawn: {
@@ -542,130 +479,6 @@ const TRACKS: Record<MusicTrackId, Track> = {
     },
   },
 
-  // Exam-season minimalism: steady sixteenths round the chord, a second line
-  // in threes against them, a soft pulse once it settles in.
-  ib: {
-    bpm: 100,
-    bars: 8,
-    echo: { steps: 3, feedback: 0.35, wet: 0.2 },
-    crackle: 0.03,
-    gain: 1.9,
-    play(kit, step, bar, time, sixteenth) {
-      const chord = IB_CHORDS[bar % 4];
-      if (step === 0) bass(kit, IB_ROOTS[bar % 4], time, sixteenth * 15, 0.09, "sine");
-      const order = [0, 1, 2, 3, 2, 1];
-      pluck(kit, chord[order[step % 6]] + 12, time, 0.022, {
-        decay: 0.26,
-        bright: 2600,
-        send: 0.25,
-        type: "triangle",
-      });
-      if (bar >= 2 && step % 3 === 0) {
-        epiano(kit, chord[(step / 3) % 4] + 24, time, sixteenth * 2, 0.018);
-      }
-      if (bar >= 4) {
-        if (step === 0 || step === 8) kick(kit, time, 0.12);
-        if (step % 4 === 2) hat(kit, time, 0.014);
-      }
-    },
-  },
-
-  // Pep band: a drumline on every sixteenth, organ stabs, a stadium riff.
-  varsity: {
-    bpm: 120,
-    bars: 8,
-    echo: { steps: 2, feedback: 0.15, wet: 0.08 },
-    crackle: 0.03,
-    play(kit, step, bar, time, sixteenth) {
-      const chord = VARSITY_CHORDS[bar % 4];
-      if (step === 0 || step === 8 || step === 11) kick(kit, time, 0.19);
-      snare(kit, time, step === 4 || step === 12 ? 0.07 : step % 2 ? 0.01 : 0.018);
-      if (step % 4 === 0) bass(kit, VARSITY_ROOTS[bar % 4], time, sixteenth * 3, 0.1, "square");
-      if (step % 4 === 2) {
-        chord.forEach((note) => chip(kit, note, time, sixteenth * 1.2, 0.011));
-      }
-      if (bar >= 4) {
-        for (const [at, note, length] of VARSITY_RIFF[bar - 4]) {
-          if (at === step) chip(kit, note, time, sixteenth * length * 0.9, 0.024, "sawtooth");
-        }
-      }
-    },
-  },
-
-  // Observatory: wide pads, a scatter of star bells, a faint ping from far off.
-  clubs: {
-    bpm: 66,
-    bars: 8,
-    echo: { steps: 6, feedback: 0.5, wet: 0.34 },
-    crackle: 0.04,
-    gain: 1.5,
-    play(kit, step, bar, time, sixteenth) {
-      const chord = NIGHT_CHORDS[bar % 4];
-      if (step === 0) {
-        chord.forEach((note) => pad(kit, note, time, sixteenth * 15, 0.018, 800));
-        bass(kit, NIGHT_ROOTS[bar % 4], time, sixteenth * 15, 0.08, "sine");
-      }
-      if (bar >= 1 && TWINKLE.includes((step + bar * 3) % 16)) {
-        bell(kit, STARS[(step + bar) % STARS.length], time, 0.022, 0.6);
-      }
-      if (bar >= 4 && step === 8) bell(kit, 96, time, 0.01, 0.8);
-    },
-  },
-
-  // College harpsichord: bright arpeggios over the canon, the tune on top.
-  oxford: {
-    bpm: 84,
-    bars: 8,
-    echo: { steps: 4, feedback: 0.22, wet: 0.14 },
-    crackle: 0.05,
-    gain: 1.8,
-    play(kit, step, bar, time, sixteenth) {
-      const chord = OXFORD_CHORDS[bar];
-      const pattern = [0, 1, 2, 1];
-      if (step % 2 === 0) {
-        const note = chord[pattern[(step / 2) % 4]] + (step >= 8 ? 12 : 0);
-        pluck(kit, note, time, 0.022, { decay: 0.24, bright: 5200, send: 0.2 });
-      }
-      if (step % 4 === 0) {
-        bass(kit, OXFORD_ROOTS[bar] + (step === 8 ? 12 : 0), time, sixteenth * 3.5, 0.09);
-      }
-      if (step === 0) epiano(kit, OXFORD_TUNE[bar] + 12, time, sixteenth * 7, 0.03);
-      if (step === 8) epiano(kit, OXFORD_TUNE[bar], time, sixteenth * 6, 0.022);
-    },
-  },
-
-  // Caribbean afternoon: güira scraping every sixteenth, a tambora slap,
-  // syncopated bass and a picked requinto line.
-  nph: {
-    bpm: 124,
-    bars: 8,
-    echo: { steps: 3, feedback: 0.2, wet: 0.1 },
-    crackle: 0.035,
-    gain: 1.1,
-    play(kit, step, bar, time, sixteenth) {
-      const chord = NPH_CHORDS[bar % 4];
-      const root = NPH_ROOTS[bar % 4];
-      noiseHit(kit, time, step % 2 ? 0.012 : 0.026, {
-        freq: 6200,
-        attack: 0.008,
-        decay: step % 4 === 0 ? 0.07 : 0.035,
-      });
-      if (step === 0 || step === 8) kick(kit, time, 0.15);
-      if (step === 6 || step === 14) {
-        noiseHit(kit, time, 0.05, { type: "bandpass", freq: 900, q: 1.2, decay: 0.08 });
-      }
-      if (step === 4 || step === 12) rim(kit, time, 0.03);
-      if (step === 0 || step === 6 || step === 8 || step === 11) {
-        bass(kit, root - 12 + (step === 8 ? 7 : 0), time, sixteenth * 1.6, 0.1, "sine");
-      }
-      if (bar >= 2) {
-        const tones = [...chord, chord[0] + 12];
-        nylon(kit, tones[REQUINTO[step % 8]] + 12, time, 0.03);
-      } else if (step % 4 === 0) {
-        chord.forEach((note, index) => nylon(kit, note + 12, time + index * 0.012, 0.022));
-      }
-    },
-  },
 };
 
 /* ------------------------------------------------------------------------ */

@@ -32,19 +32,39 @@ export type BookDef = {
   /** Multi-page books: each entry is one open left/right pair. When set,
    *  takes precedence over `spread`. */
   spreads?: BookSpread[];
+  /** Page-by-page books, paired into spreads when opened. Takes precedence
+   *  over `spreads`: on a phone only the right-hand page is readable, so
+   *  every page gets its turn on the right there. */
+  pages?: ReactNode[];
   /** Resting lean on the shelf, degrees. */
   lean?: number;
 };
 
 export type ShelfTheme = "paper" | "terminal";
 
-/** Normalize single-spread and multi-spread books into one list. */
-export function getBookSpreads(book: BookDef): BookSpread[] {
+/** Normalize page lists, single spreads and multi-spread books into one
+ *  list of spreads. `singlePage` is the phone layout, where the left page
+ *  only peeks in from the edge. */
+export function getBookSpreads(book: BookDef, singlePage = false): BookSpread[] {
+  const pages = book.pages;
+  if (pages?.length) {
+    if (singlePage) {
+      return pages.map((page, index) => ({
+        left: index > 0 ? pages[index - 1] : null,
+        right: page,
+      }));
+    }
+    const spreads: BookSpread[] = [];
+    for (let index = 0; index < pages.length; index += 2) {
+      spreads.push({ left: pages[index], right: pages[index + 1] ?? null });
+    }
+    return spreads;
+  }
   if (book.spreads?.length) return book.spreads;
   if (book.spread) return [book.spread];
   return [];
 }
 
 export function bookHasContent(book: BookDef): boolean {
-  return getBookSpreads(book).length > 0;
+  return Boolean(book.pages?.length || book.spreads?.length || book.spread);
 }

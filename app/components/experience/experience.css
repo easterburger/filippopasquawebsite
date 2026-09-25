@@ -1,6 +1,5 @@
-/* A record crate (Experience, Education). Sleeves along the top, one giant
-   word that takes on each record's colours, and a player that slides the
-   vinyl out. Per-record artwork for Education lives in education.css. */
+/* Experience: a record crate. Sleeves along the top, one giant word that
+   takes on each record's colours, and a player that slides the vinyl out. */
 
 .xp-page {
   --bg: #0a0a0b;
@@ -811,7 +810,7 @@
   font-size: clamp(3.2rem, 6vw, 6.2rem);
 }
 
-/* Long words (LUMOSTUDIO, DOMINICANA) step down so they fit the column. */
+/* Long words (LUMOSTUDIO) step down so they fit the column. */
 .xp-story-title.is-long {
   font-size: clamp(2.6rem, 4.4vw, 4.6rem);
 }

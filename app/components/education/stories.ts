@@ -1,10 +1,10 @@
 import type { Story } from "../experience/types";
 
-import type { EducationId } from "./records";
+// The Education books' text, written from the CV, the Oxford Royale project
+// report and the Experience stories. Each highlight appears verbatim in its
+// paragraph.
 
-// Stories for the Education records, written from the CV, the Oxford Royale
-// project report and the Experience stories. Each highlight appears verbatim
-// in its paragraph.
+export type EducationId = "ib" | "varsity" | "clubs" | "oxford" | "nph";
 
 export const stories: Record<EducationId, Story> = {
   ib: {
@@ -52,7 +52,7 @@ export const stories: Record<EducationId, Story> = {
             highlight: "Zayno",
           },
           {
-            text: "The rest of school life is on the other records in this crate: two varsity teams, two clubs, the tutoring, and a week spent building in the Dominican Republic.",
+            text: "The rest of school life is in the other books on these shelves: two varsity teams, two clubs, the tutoring, and a week spent building in the Dominican Republic.",
             highlight: "varsity",
           },
         ],
@@ -237,17 +237,17 @@ export const stories: Record<EducationId, Story> = {
   },
 
   nph: {
-    dek: "A week in the Dominican Republic with NPH, building a bike shed for the community.",
+    dek: "A week in the Dominican Republic with NPH, helping build a bike shed for the community.",
     sections: [
       {
         label: "the trip",
         paragraphs: [
           {
-            text: "In February 2025 I spent a week in the Dominican Republic on a service project with NPH, Nuestros Pequeños Hermanos, and the Francesco Rava Foundation.",
+            text: "In February 2025 I spent a week in the Dominican Republic on a service project with NPH, Nuestros Pequeños Hermanos, and the Francesca Rava Foundation.",
             highlight: "a week",
           },
           {
-            text: "The job was a building: a community bike shed, so bikes had somewhere safe to be kept and getting around locally was a little easier.",
+            text: "The job was helping build a community bike shed, so bikes had somewhere safe to be kept and getting around locally was a little easier.",
             highlight: "bike shed",
           },
         ],
@@ -256,22 +256,22 @@ export const stories: Record<EducationId, Story> = {
         label: "the week",
         paragraphs: [
           {
-            text: "It's a different kind of project from everything else on this site. No code, no screens, nothing to deploy. A week of physical work with other people, and at the end a structure standing that wasn't there before.",
+            text: "It's a different kind of project from everything else on this site. No code, no screens, nothing to deploy: a week of physical work, building something with other people.",
             highlight: "No code",
           },
           {
-            text: "NPH runs homes and schools for children across Latin America and the Caribbean, and the Francesco Rava Foundation supports its work from Italy.",
+            text: "NPH runs homes and schools for children across Latin America and the Caribbean, and the Francesca Rava Foundation supports its work from Italy.",
             highlight: "homes and schools",
           },
         ],
       },
     ],
-    quote: "No code, no screens, nothing to deploy. Just a bike shed that wasn't there before.",
+    quote: "No code, no screens, nothing to deploy. Just a week of building with other people.",
     specs: [
       { label: "Where", value: "Dominican Republic" },
       { label: "When", value: "February 2025, one week" },
-      { label: "With", value: "NPH and the Francesco Rava Foundation" },
-      { label: "Built", value: "A community bike shed" },
+      { label: "With", value: "NPH and the Francesca Rava Foundation" },
+      { label: "Project", value: "Helping build a community bike shed" },
     ],
   },
 };

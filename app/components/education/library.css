@@ -1,0 +1,1346 @@
+/* Education: a lamp-lit library. A walnut bookcase against a deep green wall,
+   three shelves of books standing spine-out, a few things between them.
+   The 3D book itself (ShelfBook, OpenBookOverlay) is styled in globals.css. */
+
+.edu-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.edu-library {
+  --shelf-scale: 0.8;
+  --s: var(--shelf-scale);
+  /* Tallest book, plus headroom for a book pulled up off the board. */
+  --stage-h: calc(344px * var(--s) + 34px);
+  --board-h: 26px;
+  --wood-light: #9a6b3f;
+  --wood: #6e4526;
+  --wood-dark: #3e2413;
+  --brass: #d9b46a;
+  --cream: #f3e9d8;
+  --cream-muted: rgb(243 233 216 / 0.66);
+  --page-ink: #241f19;
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  padding-bottom: clamp(48px, 8vh, 96px);
+  overflow-x: clip;
+  background: #0f1813;
+  color: var(--cream);
+}
+
+/* --- The room -------------------------------------------------------------- */
+
+.edu-room {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 46% 38% at 50% 0%,
+      rgb(255 205 140 / 0.24),
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 80% 60% at 50% 55%,
+      rgb(255 196 128 / 0.06),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 120% 90% at 50% 40%,
+      transparent 50%,
+      rgb(0 0 0 / 0.6)
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.018) 0 2px,
+      transparent 2px 9px
+    ),
+    linear-gradient(180deg, #16241c, #0c140f);
+}
+
+/* A brass pendant hanging over the bookcase. */
+.edu-lamp {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 58px;
+  background: rgb(217 180 106 / 0.5);
+  transform: translateX(-50%);
+}
+
+.edu-lamp::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 86px;
+  height: 30px;
+  border-radius: 50% 50% 8px 8px / 90% 90% 8px 8px;
+  background: linear-gradient(180deg, #2c5a3e, #173826);
+  box-shadow:
+    inset 0 -3px 0 var(--brass),
+    0 18px 40px 6px rgb(255 205 140 / 0.28);
+  transform: translateX(-50%);
+}
+
+/* --- Title ---------------------------------------------------------------- */
+
+.edu-library-hero {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: clamp(118px, 15vh, 150px) 24px 0;
+  text-align: center;
+  animation: edu-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.edu-library-kicker {
+  margin: 0 0 12px;
+  color: var(--brass);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.edu-library-heading {
+  margin: 0;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: clamp(3rem, 6.4vw, 5.6rem);
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 0.92;
+}
+
+.edu-library-intro {
+  max-width: 42ch;
+  margin: 18px auto 0;
+  color: var(--cream-muted);
+  font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+  line-height: 1.5;
+  text-wrap: balance;
+}
+
+/* --- The bookcase ------------------------------------------------------------ */
+
+.edu-case {
+  position: relative;
+  width: min(100% - 48px, 980px);
+  margin: clamp(36px, 6vh, 64px) auto 0;
+  padding: 0 22px;
+  /* The uprights: two walnut sides. */
+  background:
+    linear-gradient(
+        90deg,
+        var(--wood-dark),
+        var(--wood) 30%,
+        var(--wood-light) 55%,
+        var(--wood) 80%,
+        var(--wood-dark)
+      )
+      left / 22px 100% no-repeat,
+    linear-gradient(
+        90deg,
+        var(--wood-dark),
+        var(--wood) 20%,
+        var(--wood-light) 45%,
+        var(--wood) 70%,
+        var(--wood-dark)
+      )
+      right / 22px 100% no-repeat;
+  box-shadow: 0 60px 90px -40px rgb(0 0 0 / 0.8);
+  animation: edu-rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+}
+
+.edu-case-crown,
+.edu-case-plinth {
+  position: relative;
+  display: block;
+  margin: 0 -34px;
+  border-radius: 4px;
+  background: linear-gradient(
+    180deg,
+    var(--wood-light),
+    var(--wood) 40%,
+    var(--wood-dark)
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 226 180 / 0.3),
+    0 10px 24px rgb(0 0 0 / 0.45);
+}
+
+.edu-case-crown {
+  height: 30px;
+}
+
+/* A thin moulding under the crown. */
+.edu-case-crown::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  bottom: -8px;
+  left: 12px;
+  height: 8px;
+  background: linear-gradient(180deg, var(--wood), var(--wood-dark));
+}
+
+.edu-case-plinth {
+  height: 36px;
+  margin-top: 0;
+}
+
+.edu-shelf {
+  position: relative;
+  /* The back panel: vertical walnut planks, darker toward the top. */
+  background:
+    linear-gradient(
+      180deg,
+      rgb(0 0 0 / 0.5),
+      rgb(0 0 0 / 0.12) 60%,
+      rgb(0 0 0 / 0.3)
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0.2) 0 2px,
+      transparent 2px 120px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.025) 0 1px,
+      transparent 1px 7px
+    ),
+    linear-gradient(180deg, #4a2c17, #3a2211);
+}
+
+.edu-shelf-scroller {
+  padding: 30px 0 0;
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+.edu-shelf-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: var(--stage-h);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.edu-shelf-item {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  flex: 0 0 auto;
+  perspective: 1100px;
+}
+
+.edu-shelf-item.is-prop {
+  margin: 0 10px;
+}
+
+/* Each item is its own stacking context (perspective), so the one whose book
+   is pulled out has to come forward past its neighbours. */
+.edu-shelf-item:has(.book3d-slot.is-out) {
+  z-index: 5;
+}
+
+/* Spines stand close together, like a real shelf. */
+.edu-library .book3d-slot {
+  width: calc(var(--bd) * var(--s) + 5px);
+}
+
+.edu-library .book3d-shadow {
+  background: radial-gradient(
+    ellipse at center,
+    rgb(0 0 0 / 0.6),
+    transparent 66%
+  );
+}
+
+.edu-library .book3d-slot:focus-visible {
+  outline-color: var(--brass);
+}
+
+.edu-library .bookspine-sub {
+  opacity: 0.88;
+}
+
+/* The books that open catch the lamp a little. */
+.edu-shelf-item.is-real .bookface-spine {
+  box-shadow:
+    inset 2px 0 3px rgb(255 255 255 / 0.16),
+    inset -2px 0 3px rgb(0 0 0 / 0.28),
+    0 0 18px rgb(255 205 140 / 0.12);
+}
+
+/* A silk ribbon marker poking out of the top of each book that opens. */
+.edu-shelf-item.is-real::after {
+  content: "";
+  position: absolute;
+  bottom: calc(100% - 4px);
+  left: 50%;
+  width: 6px;
+  height: 18px;
+  background: linear-gradient(90deg, #8e1f2c, #c8394a 50%, #8e1f2c);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+  transform: translateX(-50%) rotate(-4deg);
+  transform-origin: 50% 100%;
+  pointer-events: none;
+  animation: edu-ribbon 360ms ease var(--ribbon-delay, 0ms) both;
+}
+
+.edu-shelf-item.is-real:has(.book3d-slot.is-out, .book3d-slot.is-ghost)::after {
+  visibility: hidden;
+}
+
+@keyframes edu-ribbon {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.edu-shelf-board {
+  position: relative;
+  z-index: 2;
+  height: var(--board-h);
+  margin: 0 -2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    #b07f4d 0%,
+    var(--wood) 22%,
+    #563419 70%,
+    var(--wood-dark) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 226 180 / 0.35),
+    0 3px 0 rgb(20 12 6 / 0.55),
+    0 18px 28px -8px rgb(0 0 0 / 0.7);
+}
+
+/* A brass card holder on the front of each board. */
+.edu-shelf-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  padding: 3px 14px;
+  border: 2px solid var(--brass);
+  border-radius: 3px;
+  background: #f1e6cf;
+  box-shadow:
+    inset 0 0 0 1px rgb(120 90 40 / 0.35),
+    0 2px 4px rgb(0 0 0 / 0.4);
+  color: #2b2118;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+}
+
+.edu-shelf-card span {
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 0.86rem;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.edu-shelf-card small {
+  font-size: 0.56rem;
+  font-weight: 650;
+  letter-spacing: 0.16em;
+  opacity: 0.66;
+  text-transform: uppercase;
+}
+
+/* --- Things on the shelves ------------------------------------------------- */
+
+.edu-prop {
+  position: relative;
+  display: block;
+}
+
+.edu-prop-bookend {
+  width: calc(20px * var(--s));
+  height: calc(150px * var(--s));
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(90deg, #7a5a2c, var(--brass) 45%, #8a6a3a);
+  box-shadow: 0 6px 12px rgb(0 0 0 / 0.5);
+}
+
+.edu-prop-bookend::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: calc(60px * var(--s));
+  height: 4px;
+  border-radius: 2px;
+  background: #8a6a3a;
+  transform: translateX(-50%);
+}
+
+.edu-prop-plant {
+  width: calc(96px * var(--s));
+  height: calc(200px * var(--s));
+}
+
+/* Terracotta pot. */
+.edu-prop-plant::after {
+  content: "";
+  position: absolute;
+  right: 12%;
+  bottom: 0;
+  left: 12%;
+  height: 34%;
+  background: linear-gradient(90deg, #8e4a2c, #c96f45 45%, #9a5230);
+  clip-path: polygon(0 0, 100% 0, 86% 100%, 14% 100%);
+}
+
+.edu-prop-leaf {
+  position: absolute;
+  bottom: 30%;
+  left: 50%;
+  width: 22%;
+  height: 58%;
+  border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
+  background: linear-gradient(180deg, #6fae5c, #2f6b36);
+  transform-origin: 50% 100%;
+}
+
+.edu-prop-leaf:nth-child(1) {
+  transform: translateX(-50%) rotate(-38deg);
+}
+
+.edu-prop-leaf:nth-child(2) {
+  transform: translateX(-50%) rotate(-12deg);
+  height: 66%;
+}
+
+.edu-prop-leaf:nth-child(3) {
+  transform: translateX(-50%) rotate(14deg);
+  height: 62%;
+}
+
+.edu-prop-leaf:nth-child(4) {
+  transform: translateX(-50%) rotate(40deg);
+  height: 50%;
+}
+
+/* The golf team's first place. */
+.edu-prop-trophy {
+  width: calc(88px * var(--s));
+  height: calc(176px * var(--s));
+}
+
+.edu-prop-trophy::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 14%;
+  width: 72%;
+  height: 46%;
+  border-radius: 6% 6% 50% 50% / 6% 6% 60% 60%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    #fff2c4,
+    #e2b650 40%,
+    #9c7424 90%
+  );
+  box-shadow:
+    calc(-10px * var(--s)) calc(8px * var(--s)) 0 calc(-2px * var(--s)) #b8903a,
+    calc(10px * var(--s)) calc(8px * var(--s)) 0 calc(-2px * var(--s)) #b8903a;
+}
+
+.edu-prop-trophy::after {
+  content: "";
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  width: 14%;
+  height: 26%;
+  background: linear-gradient(90deg, #9c7424, #e2b650, #9c7424);
+  transform: translateX(-50%);
+}
+
+.edu-prop-trophy-plate {
+  position: absolute;
+  right: 6%;
+  bottom: 0;
+  left: 6%;
+  display: grid;
+  place-items: center;
+  height: 30%;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #2b2118, #16110c);
+  color: var(--brass);
+  font-size: calc(11px * var(--s) + 2px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.edu-prop-ball {
+  width: calc(96px * var(--s));
+  height: calc(96px * var(--s));
+  border-radius: 50%;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 48.5%,
+      #3a1a08 48.5% 51.5%,
+      transparent 51.5%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 48.5%,
+      #3a1a08 48.5% 51.5%,
+      transparent 51.5%
+    ),
+    radial-gradient(circle at 35% 30%, #f7a25a, #e0702a 45%, #9e4414);
+  box-shadow: 0 8px 14px rgb(0 0 0 / 0.5);
+}
+
+/* Curved seams. */
+.edu-prop-ball::before,
+.edu-prop-ball::after {
+  content: "";
+  position: absolute;
+  top: 8%;
+  bottom: 8%;
+  width: 40%;
+  border: 2px solid #3a1a08;
+  border-radius: 50%;
+}
+
+.edu-prop-ball::before {
+  left: -18%;
+  border-width: 0 2px 0 0;
+}
+
+.edu-prop-ball::after {
+  right: -18%;
+  border-width: 0 0 0 2px;
+}
+
+.edu-prop-globe {
+  width: calc(120px * var(--s));
+  height: calc(190px * var(--s));
+}
+
+.edu-prop-globe::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 8%;
+  width: 84%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 24% 18% at 34% 38%, #7aa865 60%, transparent 62%),
+    radial-gradient(ellipse 18% 26% at 62% 58%, #7aa865 60%, transparent 62%),
+    radial-gradient(ellipse 14% 10% at 70% 26%, #7aa865 60%, transparent 62%),
+    radial-gradient(circle at 35% 30%, #bfe0f0, #4d8fb3 55%, #1d4a66);
+  box-shadow:
+    inset -8px -6px 14px rgb(0 0 0 / 0.35),
+    0 0 0 3px #b8903a;
+}
+
+.edu-prop-globe::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 22%;
+  width: 56%;
+  height: 22%;
+  background:
+    linear-gradient(90deg, #7a5a2c, var(--brass), #7a5a2c) center top / 10% 70%
+      no-repeat,
+    linear-gradient(180deg, #8a6a3a, #5a4020) center bottom / 100% 30% no-repeat;
+}
+
+/* Books lying flat. */
+.edu-prop-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 1px;
+}
+
+.edu-prop-stack span {
+  display: block;
+  height: calc(34px * var(--s));
+  border-radius: 2px 4px 4px 2px;
+  box-shadow:
+    inset 0 -3px 0 rgb(0 0 0 / 0.2),
+    0 3px 6px rgb(0 0 0 / 0.4);
+}
+
+.edu-prop-stack span:nth-child(1) {
+  width: calc(210px * var(--s));
+  background: linear-gradient(180deg, #7a2f2f, #5a1f1f);
+}
+
+.edu-prop-stack span:nth-child(2) {
+  width: calc(190px * var(--s));
+  background: linear-gradient(180deg, #2f4a6b, #20354f);
+}
+
+.edu-prop-stack span:nth-child(3) {
+  width: calc(170px * var(--s));
+  background: linear-gradient(180deg, #d9c9a4, #b8a67c);
+}
+
+/* --- Covers (em-scaled: the cover is 14em wide) ---------------------------- */
+
+.edu-cover-ib {
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 0 0 2em 1.5em;
+  background: #f2ede1;
+  color: #16181c;
+  text-align: left;
+}
+
+.edu-cover-ib-bands {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  width: 30%;
+}
+
+.edu-cover-ib-bands span {
+  flex: 1;
+}
+
+.edu-cover-ib-bands span:nth-child(-n + 3) {
+  flex: 1.6;
+}
+
+.edu-cover-ib-word {
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 5.4em;
+  font-weight: 900;
+  line-height: 0.85;
+}
+
+.edu-cover-ib-title {
+  max-width: 62%;
+  margin-top: 0.4em;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.1em;
+  font-style: italic;
+  line-height: 1.1;
+}
+
+.edu-cover-ib-foot {
+  max-width: 62%;
+  margin-top: 1em;
+  font-size: 0.5em;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.edu-cover-varsity {
+  justify-content: center;
+  gap: 0.6em;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgb(255 255 255 / 0.03) 0 1px,
+      transparent 1px 4px
+    ),
+    radial-gradient(circle at 30% 20%, #2b3b7c, #141d45 72%);
+  color: #fdf6e8;
+}
+
+.edu-cover-varsity-letter {
+  color: #f07f2e;
+  font-size: 8.6em;
+  font-weight: 900;
+  line-height: 0.9;
+  -webkit-text-stroke: 0.05em #fdf6e8;
+  paint-order: stroke fill;
+  text-shadow: 0.03em 0.04em 0 #0a1030;
+}
+
+.edu-cover-varsity-balls {
+  display: flex;
+  gap: 0.8em;
+  font-size: 1.7em;
+}
+
+.edu-cover-varsity-balls svg:first-child {
+  color: #f07f2e;
+}
+
+.edu-cover-varsity-foot {
+  font-size: 0.58em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.edu-cover-clubs {
+  justify-content: center;
+  gap: 0.5em;
+  background: radial-gradient(
+    120% 90% at 70% 110%,
+    #3a3f9e 0%,
+    #151a4a 46%,
+    #070918 100%
+  );
+  color: #e9edff;
+}
+
+.edu-cover-clubs::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 16% 14%, #fff 0 0.1em, transparent 0.16em),
+    radial-gradient(circle at 80% 10%, #fff 0 0.08em, transparent 0.14em),
+    radial-gradient(circle at 88% 44%, #dfe6ff 0 0.07em, transparent 0.12em),
+    radial-gradient(circle at 24% 58%, #fff 0 0.06em, transparent 0.11em),
+    radial-gradient(circle at 60% 6%, #fff 0 0.05em, transparent 0.1em),
+    radial-gradient(circle at 10% 86%, #cfd8ff 0 0.07em, transparent 0.12em),
+    radial-gradient(circle at 90% 90%, #fff 0 0.06em, transparent 0.11em);
+}
+
+.edu-cover-clubs-planet {
+  position: relative;
+  width: 7em;
+  height: 7em;
+  color: #9db2ff;
+  transform: rotate(-14deg);
+}
+
+.edu-cover-clubs-title {
+  position: relative;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.8em;
+  font-style: italic;
+}
+
+.edu-cover-clubs-foot {
+  position: relative;
+  font-size: 0.5em;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.edu-cover-oxford {
+  padding-top: 3.2em;
+  background: linear-gradient(180deg, #0a1b3a 0%, #0f2750 60%, #163566 100%);
+  color: #e9d29c;
+}
+
+.edu-cover-oxford-frame {
+  position: absolute;
+  inset: 0.7em;
+  border: 1px solid rgb(217 180 106 / 0.8);
+  box-shadow:
+    inset 0 0 0 0.25em #0f2750,
+    inset 0 0 0 calc(0.25em + 1px) rgb(217 180 106 / 0.6);
+}
+
+.edu-cover-oxford-title {
+  position: relative;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 2.9em;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.edu-cover-oxford-sub {
+  position: relative;
+  margin-top: 0.7em;
+  font-size: 0.56em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.edu-cover-oxford-foot {
+  position: relative;
+  margin-top: 0.4em;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 0.8em;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.edu-cover-oxford-skyline {
+  position: absolute;
+  right: 0.7em;
+  bottom: 0.7em;
+  left: 0.7em;
+  width: calc(100% - 1.4em);
+  height: 34%;
+  fill: #d9b46a;
+}
+
+.edu-cover-nph {
+  padding-top: 2.4em;
+  background: linear-gradient(180deg, #8fd6f0 0%, #d8f2fa 60%);
+}
+
+.edu-cover-nph-sun {
+  position: absolute;
+  top: 1.2em;
+  right: 1.4em;
+  width: 2.4em;
+  height: 2.4em;
+  border-radius: 50%;
+  background: #ffb13b;
+  box-shadow: 0 0 0 0.45em rgb(255 177 59 / 0.25);
+}
+
+.edu-cover-nph-title {
+  position: relative;
+  color: #c2410c;
+  font-size: 2.1em;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  -webkit-text-stroke: 0.08em #fff8ec;
+  paint-order: stroke fill;
+}
+
+.edu-cover-nph-walls {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  height: 50%;
+}
+
+.edu-cover-nph-walls span {
+  position: relative;
+  flex: 1;
+}
+
+.edu-cover-nph-walls span::after {
+  content: "";
+  position: absolute;
+  top: 14%;
+  right: 26%;
+  left: 26%;
+  height: 20%;
+  border-radius: 0.2em 0.2em 0 0;
+  background: rgb(0 0 0 / 0.16);
+}
+
+.edu-cover-nph-walls span:nth-child(1) {
+  background: #ff7a5c;
+}
+
+.edu-cover-nph-walls span:nth-child(2) {
+  background: #35c2b0;
+}
+
+.edu-cover-nph-walls span:nth-child(3) {
+  background: #ffd23f;
+}
+
+.edu-cover-nph-walls span:nth-child(4) {
+  background: #ff8fb1;
+}
+
+.edu-cover-nph-walls span:nth-child(5) {
+  background: #4fb3ff;
+}
+
+.edu-cover-nph-bike {
+  position: absolute;
+  bottom: 0.6em;
+  left: 50%;
+  width: 6.4em;
+  height: 6.4em;
+  color: #1d1a2b;
+  transform: translateX(-50%);
+}
+
+/* --- Pages ------------------------------------------------------------------- */
+
+.edu-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.edu-page {
+  --edu-accent-ink: color-mix(in srgb, var(--edu-accent) 55%, #241f19);
+}
+
+.edu-page-kicker {
+  margin: 0;
+  color: rgb(36 31 25 / 0.7);
+  font-size: 0.58em;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.edu-page-folio {
+  margin: auto 0 0;
+  padding-top: 0.6em;
+  color: rgb(36 31 25 / 0.66);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 0.7em;
+  font-style: italic;
+  text-align: center;
+}
+
+/* Title page. */
+.edu-page-title {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.edu-page-title .edu-page-kicker {
+  margin-top: auto;
+}
+
+.edu-page-heading {
+  margin: 0;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 2.3em;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.edu-page-subtitle {
+  max-width: 22ch;
+  margin: 0;
+  color: rgb(36 31 25 / 0.74);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 0.95em;
+  line-height: 1.35;
+}
+
+.edu-page-rule {
+  width: 3em;
+  height: 2px;
+  margin: 0.4em 0;
+  background: var(--edu-accent);
+}
+
+.edu-page-meta {
+  display: grid;
+  gap: 0.35em;
+  margin: 0;
+  padding: 0;
+  color: rgb(36 31 25 / 0.7);
+  font-size: 0.66em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  list-style: none;
+}
+
+/* Contents. */
+.edu-page-dek {
+  margin: 0 0 0.6em;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.22em;
+  font-style: italic;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.edu-page-toc {
+  display: grid;
+  gap: 0.45em;
+  margin: 0;
+  padding: 0;
+  counter-reset: toc;
+  list-style: none;
+}
+
+.edu-page-toc li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6em;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 0.95em;
+  counter-increment: toc;
+}
+
+.edu-page-toc li::before {
+  content: counter(toc, upper-roman) ".";
+  min-width: 2em;
+  color: var(--edu-accent-ink);
+  font-size: 0.8em;
+  font-weight: 700;
+}
+
+/* Chapters. */
+.edu-page-chapter-title {
+  margin: -0.2em 0 0.2em;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.5em;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.edu-page-prose {
+  margin: 0;
+  color: rgb(36 31 25 / 0.88);
+  font-size: 0.86em;
+  line-height: 1.55;
+  hyphens: auto;
+}
+
+.edu-page-chapter-title + .edu-page-prose::first-letter {
+  float: left;
+  margin: 0.06em 0.1em 0 0;
+  color: var(--edu-accent-ink);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 3.1em;
+  font-weight: 700;
+  line-height: 0.8;
+}
+
+.edu-page-mark {
+  padding: 0 0.1em;
+  background: linear-gradient(
+    180deg,
+    transparent 52%,
+    color-mix(in srgb, var(--edu-accent) 42%, transparent) 52% 92%,
+    transparent 92%
+  );
+  color: inherit;
+}
+
+/* Quote. */
+.edu-page-quote {
+  justify-content: center;
+}
+
+.edu-page-blockquote {
+  position: relative;
+  margin: auto 0 0;
+  padding-top: 1.2em;
+}
+
+.edu-page-blockquote::before {
+  content: "\201C";
+  position: absolute;
+  top: -0.3em;
+  left: -0.05em;
+  color: var(--edu-accent);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 4.6em;
+  line-height: 1;
+}
+
+.edu-page-blockquote p {
+  margin: 0;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.55em;
+  font-style: italic;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+/* Plate. */
+.edu-page-plate {
+  justify-content: center;
+}
+
+.edu-page-figure {
+  margin: auto 0 0;
+}
+
+.edu-page-figure img {
+  display: block;
+  width: 100%;
+  border: 1px solid rgb(36 31 25 / 0.14);
+  border-radius: 0.3em;
+  background: #fff;
+}
+
+.edu-page-figure figcaption {
+  margin-top: 0.7em;
+  color: rgb(36 31 25 / 0.7);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 0.72em;
+  font-style: italic;
+  text-align: center;
+}
+
+/* Colophon. */
+.edu-page-specs {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.edu-page-specs div {
+  display: grid;
+  grid-template-columns: 7.4em minmax(0, 1fr);
+  gap: 0.8em;
+  padding: 0.55em 0;
+  border-bottom: 1px solid rgb(36 31 25 / 0.12);
+}
+
+.edu-page-specs dt {
+  color: rgb(36 31 25 / 0.7);
+  font-size: 0.6em;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 2;
+  text-transform: uppercase;
+}
+
+.edu-page-specs dd {
+  margin: 0;
+  font-size: 0.8em;
+  line-height: 1.4;
+}
+
+/* Ex libris. */
+.edu-page-exlibris {
+  align-items: center;
+  justify-content: center;
+}
+
+.edu-page-stamp {
+  display: grid;
+  place-items: center;
+  width: 8em;
+  height: 8em;
+  margin: auto 0 0;
+  border: 2px solid var(--edu-accent-ink);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 4px #f5efe0,
+    inset 0 0 0 5px var(--edu-accent-ink);
+  color: var(--edu-accent-ink);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 0.95em;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  transform: rotate(-9deg);
+  align-content: center;
+}
+
+.edu-page-stamp span {
+  display: block;
+  font-family: var(--font-primary), Arial, sans-serif;
+  font-size: 0.55em;
+  font-style: normal;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+/* Big pages (a desktop spread) have room for bigger type; smaller pages and
+   single pages on phones keep the compact size so a chapter fits one page. */
+.openbook-overlay.is-roomy:not(.is-single) .edu-page {
+  gap: 0.85em;
+}
+
+.openbook-overlay.is-roomy:not(.is-single) .edu-page-prose {
+  font-size: 1.02em;
+  line-height: 1.6;
+}
+
+.openbook-overlay.is-roomy:not(.is-single) .edu-page-chapter-title {
+  font-size: 1.85em;
+}
+
+.openbook-overlay.is-roomy:not(.is-single) .edu-page-dek {
+  font-size: 1.45em;
+}
+
+.openbook-overlay.is-roomy:not(.is-single) .edu-page-toc li {
+  font-size: 1.1em;
+}
+
+.openbook-overlay.is-roomy:not(.is-single) .edu-page-blockquote p {
+  font-size: 1.9em;
+}
+
+.openbook-overlay.is-roomy:not(.is-single) .edu-page-specs dd {
+  font-size: 0.92em;
+}
+
+@media (max-height: 720px) {
+  .edu-page.bookpage {
+    gap: 0.5em;
+    padding: 6% 8% 4%;
+  }
+
+  .edu-page-prose {
+    font-size: 0.8em;
+    line-height: 1.48;
+  }
+
+  .edu-page-chapter-title {
+    font-size: 1.3em;
+  }
+
+  .edu-page-folio {
+    padding-top: 0.3em;
+  }
+}
+
+@keyframes edu-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --- Smaller screens ------------------------------------------------------------ */
+
+@media (max-width: 1100px) {
+  .edu-library {
+    --shelf-scale: 0.7;
+  }
+}
+
+@media (max-width: 900px) {
+  .edu-library {
+    --shelf-scale: 0.62;
+  }
+
+  /* Rows scroll here, so the untitled fillers would only push the books
+     worth opening off screen. */
+  .edu-shelf-item.is-decor {
+    display: none;
+  }
+
+  .edu-case {
+    width: min(100% - 32px, 1040px);
+    padding: 0 16px;
+    background-size:
+      16px 100%,
+      16px 100%;
+  }
+
+  .edu-case-crown,
+  .edu-case-plinth {
+    margin: 0 -24px;
+  }
+
+  /* Rows longer than the case scroll sideways instead of spilling out. */
+  .edu-shelf-scroller {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding-bottom: 12px;
+    margin-bottom: -12px;
+  }
+
+  .edu-shelf-scroller::-webkit-scrollbar {
+    display: none;
+  }
+
+  .edu-shelf-row {
+    /* Centred while it fits, starting at the left once it scrolls. */
+    justify-content: safe center;
+    width: max-content;
+    min-width: 100%;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .edu-library {
+    --shelf-scale: 0.52;
+  }
+
+  .edu-library-hero {
+    padding-top: calc(max(1.15em, env(safe-area-inset-top, 0px)) + 88px);
+  }
+
+  .edu-lamp {
+    display: none;
+  }
+
+  .edu-case {
+    width: calc(100% - 20px);
+    padding: 0 12px;
+    background-size:
+      12px 100%,
+      12px 100%;
+  }
+
+  .edu-case-crown,
+  .edu-case-plinth {
+    margin: 0 -10px;
+  }
+
+  .edu-shelf-scroller {
+    padding-top: 20px;
+  }
+
+  .edu-shelf-card {
+    padding: 2px 10px;
+  }
+
+  .edu-shelf-card small {
+    display: none;
+  }
+
+  .edu-library .book3d-slot {
+    width: calc(var(--bd) * var(--s) + 6px);
+  }
+
+  .edu-shelf-item.is-prop {
+    margin: 0 4px;
+  }
+
+  /* Every book on a shelf fits a phone without scrolling. */
+  .edu-shelf-item:has(.edu-prop-stack) {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .edu-shelf-item:has(.edu-prop-plant, .edu-prop-ball) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edu-library-hero,
+  .edu-case,
+  .edu-shelf-item.is-real::after {
+    animation: none;
+  }
+}

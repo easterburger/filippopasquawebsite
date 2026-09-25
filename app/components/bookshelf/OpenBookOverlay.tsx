@@ -70,7 +70,7 @@ export default function OpenBookOverlay({
 }: OpenBookOverlayProps) {
   const { play } = useSound();
   const reduceMotion = useReducedMotion();
-  const spreads = getBookSpreads(book);
+  const spreads = getBookSpreads(book, geometry.shift === 0);
   const pageCount = spreads.length;
   const [pageIndex, setPageIndex] = useState(0);
   const [turn, setTurn] = useState<TurnState | null>(null);
@@ -324,6 +324,13 @@ export default function OpenBookOverlay({
   const canNext = pageIndex < pageCount - 1 && !turn;
   const folio = turn ? turn.to + 1 : pageIndex + 1;
 
+  // Which spread each side is showing. Keying the page by it mounts every
+  // page fresh, so a long page scrolled to its end doesn't hand that scroll
+  // position to the next one.
+  const rightKey = turn ? (turn.dir === 1 ? turn.to : turn.from) : pageIndex;
+  const leftKey = turn ? (turn.dir === 1 ? turn.from : turn.to) : pageIndex;
+  const current = spreads[turn ? turn.to : pageIndex];
+
   return (
     <div
       className={[
@@ -331,6 +338,8 @@ export default function OpenBookOverlay({
         `is-${phase}`,
         turn ? "is-turning" : "",
         isSinglePage ? "is-single" : "",
+        // Pages big enough for full-size type.
+        geometry.H >= 640 && geometry.W >= 440 ? "is-roomy" : "",
         coarsePointer ? "is-touch" : "",
       ]
         .filter(Boolean)
@@ -387,7 +396,16 @@ export default function OpenBookOverlay({
         </nav>
       ) : null}
 
+      {/* The 3D book paints the right page before the cover (and the left
+          page on it), and on phones keeps the previous page as a peek. Screen
+          readers get the open spread here instead, in reading order. */}
+      <div className="openbook-sr">
+        {isSinglePage ? null : current?.left}
+        {current?.right}
+      </div>
+
       <div
+        aria-hidden="true"
         className="openbook-stage"
         onPointerMove={handleLean}
         onPointerLeave={resetLean}
@@ -420,7 +438,9 @@ export default function OpenBookOverlay({
                 </span>
 
                 <div className="openbook-page openbook-page-right">
-                  <div className="openbook-page-swap">{rightContent}</div>
+                  <div key={rightKey} className="openbook-page-swap">
+                    {rightContent}
+                  </div>
                 </div>
 
                 {turn ? (
@@ -458,7 +478,9 @@ export default function OpenBookOverlay({
                   </span>
                   <span className="openbook-cover-back">
                     <div className="openbook-page openbook-page-left">
-                      <div className="openbook-page-swap">{leftContent}</div>
+                      <div key={leftKey} className="openbook-page-swap">
+                        {leftContent}
+                      </div>
                     </div>
                   </span>
                 </motion.div>
