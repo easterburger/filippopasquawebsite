@@ -5,7 +5,9 @@ import { headers } from "next/headers";
 import { SoundProvider } from "@/components/sound/SoundProvider";
 import SoundToggle from "@/components/sound/SoundToggle";
 
+import { INTRO_SEEN_SCRIPT } from "./components/intro-seen";
 import { PageTransitionProvider } from "./components/PageTransition";
+import PixelTrail from "./components/PixelTrail";
 import "./globals.css";
 
 const interTight = Inter_Tight({
@@ -16,7 +18,8 @@ const interTight = Inter_Tight({
 
 const playfair = Playfair_Display({
   variable: "--font-editorial",
-  subsets: ["latin"],
+  // Cyrillic covers the intro's "Привет"; unicode-range keeps it lazy.
+  subsets: ["latin", "cyrillic"],
   style: ["normal", "italic"],
   weight: ["400", "700", "900"],
   display: "swap",
@@ -66,12 +69,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    // The inline script may add data-intro-seen before hydration.
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: INTRO_SEEN_SCRIPT }} />
+      </head>
       <body className={`${interTight.variable} ${playfair.variable}`}>
         <SoundProvider>
           <PageTransitionProvider>{children}</PageTransitionProvider>
           <SoundToggle />
         </SoundProvider>
+        <PixelTrail />
       </body>
     </html>
   );

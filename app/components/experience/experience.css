@@ -1,0 +1,1464 @@
+/* A record crate (Experience, Education). Sleeves along the top, one giant
+   word that takes on each record's colours, and a player that slides the
+   vinyl out. Per-record artwork for Education lives in education.css. */
+
+.xp-page {
+  --bg: #0a0a0b;
+  --fg: #f2efe8;
+  --muted: rgb(242 239 232 / 0.56);
+  --crate: 74px;
+  --crate-active: 150px;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+  padding: clamp(96px, 13vh, 132px) 20px clamp(36px, 6vh, 64px);
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.xp-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- Crate --------------------------------------------------------------- */
+
+.xp-crate {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(18px, 3vw, 40px);
+  min-height: var(--crate-active);
+}
+
+.xp-crate-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.xp-crate-side + .xp-crate-side {
+  padding-left: clamp(18px, 3vw, 40px);
+  border-left: 1px solid rgb(242 239 232 / 0.12);
+}
+
+.xp-crate-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--crate-active);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.xp-sleeve {
+  position: relative;
+  display: block;
+  width: var(--crate);
+  height: var(--crate);
+  padding: 0;
+  overflow: hidden;
+  border: none;
+  border-radius: 10px;
+  background: #222;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.06),
+    0 10px 24px -12px rgb(0 0 0 / 0.8);
+  transition:
+    width 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 300ms ease,
+    filter 300ms ease;
+  /* backwards, not both: a filled end state would override .is-out below. */
+  animation: xp-sleeve-in 700ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--sleeve-index) * 70ms + 200ms);
+}
+
+.xp-sleeve.is-active {
+  width: var(--crate-active);
+  height: var(--crate-active);
+  border-radius: 14px;
+}
+
+.xp-crate:has(.xp-sleeve.is-active) .xp-sleeve:not(.is-active) {
+  filter: saturate(0.6) brightness(0.72);
+}
+
+/* The one that is out on the player leaves an empty slot behind. */
+.xp-sleeve.is-out {
+  opacity: 0;
+}
+
+.xp-sleeve:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 4px;
+}
+
+@keyframes xp-sleeve-in {
+  from {
+    opacity: 0;
+    transform: translateY(-18px) rotate(-4deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --- Sleeve artwork (sized off the sleeve, so it works at any scale) ------ */
+
+.sleeve {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  container-type: size;
+}
+
+.sleeve img {
+  display: block;
+}
+
+.sleeve-skycloud img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sleeve-dawn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sleeve-dawn-word {
+  position: absolute;
+  bottom: 7cqw;
+  left: 8cqw;
+  color: #fff4e6;
+  font-family: var(--font-loud), Impact, sans-serif;
+  font-size: 15cqw;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 6px rgb(60 20 40 / 0.5);
+}
+
+.sleeve-zayno {
+  display: grid;
+  place-items: center;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgb(47 107 255 / 0.12) 0 1px,
+      transparent 1px 8cqw
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgb(47 107 255 / 0.12) 0 1px,
+      transparent 1px 8cqw
+    ),
+    #f4f5f8;
+}
+
+.sleeve-zayno-mark {
+  position: relative;
+  width: 74cqw;
+  margin-top: -10cqw;
+  padding: 3cqw 4cqw;
+  background: linear-gradient(
+    transparent 38%,
+    #ffd83d 38%,
+    #ffd83d 88%,
+    transparent 88%
+  );
+}
+
+.sleeve-zayno-mark img {
+  width: 100%;
+  mix-blend-mode: multiply;
+}
+
+.sleeve-zayno-band {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 3.5cqw 0;
+  background: #2f6bff;
+  color: #ffffff;
+  font-size: 6.4cqw;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.sleeve-lumo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #1b1e24;
+  color: #f4cf99;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+.sleeve-lumo-glow {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgb(228 170 91 / 0.55),
+    transparent 68%
+  );
+  filter: blur(4cqw);
+}
+
+.sleeve-lumo-word {
+  position: relative;
+  font-size: 12cqw;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 4cqw rgb(228 170 91 / 0.8);
+}
+
+.sleeve-lumo-foot {
+  position: absolute;
+  bottom: 7cqw;
+  font-size: 5cqw;
+  letter-spacing: 0.2em;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.sleeve-borromeo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  image-rendering: pixelated;
+}
+
+.sleeve-borromeo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 55%,
+    rgb(0 0 0 / 0.45)
+  );
+}
+
+.sleeve-pasqua {
+  background: radial-gradient(
+    ellipse at 50% 30%,
+    #8a2438,
+    #511422 62%,
+    #2e0a13
+  );
+}
+
+.sleeve-pasqua-logo {
+  position: absolute;
+  top: 9cqw;
+  left: 50%;
+  width: 62cqw;
+  transform: translateX(-50%);
+}
+
+.sleeve-pasqua-bottle {
+  position: absolute;
+  bottom: -30cqw;
+  left: 50%;
+  height: 100cqw;
+  transform: translateX(-50%) rotate(-8deg);
+  filter: drop-shadow(0 4cqw 6cqw rgb(0 0 0 / 0.55));
+}
+
+/* --- Giant word ---------------------------------------------------------- */
+
+.xp-word-stage {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  flex: 1;
+  width: min(94vw, 1640px);
+  min-height: 38vh;
+  pointer-events: none;
+}
+
+.xp-word {
+  position: relative;
+  isolation: isolate;
+  grid-area: 1 / 1;
+  display: flex;
+  color: var(--fg);
+  font-family: var(--font-loud), Impact, "Arial Narrow", sans-serif;
+  font-size: clamp(4rem, 17vw, 18rem);
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  line-height: 0.9;
+  white-space: nowrap;
+}
+
+.xp-word-measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 100px;
+  visibility: hidden;
+}
+
+.xp-letter-mask {
+  display: inline-block;
+  margin: -0.06em -0.08em;
+  padding: 0.06em 0.08em;
+  overflow: hidden;
+}
+
+.xp-letter {
+  display: inline-block;
+}
+
+.xp-word.is-in .xp-letter {
+  animation: xp-letter-in 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 26ms);
+}
+
+/* The fading copy is a fresh element: keep its bar and flag fully drawn
+   instead of replaying their wipe-in on the way out. */
+.xp-word.is-out.is-zayno::before,
+.xp-word.is-out.is-bds::after {
+  animation: none;
+}
+
+.xp-word.is-out {
+  pointer-events: none;
+  animation: xp-word-out 280ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes xp-letter-in {
+  from {
+    transform: translateY(108%) rotate(7deg);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@keyframes xp-word-out {
+  to {
+    opacity: 0;
+    filter: blur(12px);
+    transform: translateY(-5%) scale(0.985);
+  }
+}
+
+/* Dawn: a sunrise poured into the letters. */
+.xp-word.is-dawn .xp-letter {
+  background: linear-gradient(
+    180deg,
+    #7b4bd1 0%,
+    #e0457b 42%,
+    #ff8a3d 70%,
+    #ffd27d 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Zayno: grid-paper letters over a highlighter stroke. */
+.xp-word.is-zayno .xp-letter {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgb(47 107 255 / 0.3) 0 2px,
+      transparent 2px 0.09em
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgb(47 107 255 / 0.3) 0 2px,
+      transparent 2px 0.09em
+    ),
+    #f4f5f8;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.xp-word.is-zayno::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -3%;
+  left: -3%;
+  z-index: -1;
+  height: 38%;
+  background: #ffd83d;
+  transform: skewX(-10deg);
+  transform-origin: left;
+  animation: xp-highlight 620ms cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
+}
+
+@keyframes xp-highlight {
+  from {
+    transform: skewX(-10deg) scaleX(0);
+  }
+
+  to {
+    transform: skewX(-10deg) scaleX(1);
+  }
+}
+
+/* LumoStudio: amber phosphor on a scanlined screen, with a live cursor. */
+.xp-word.is-lumostudio .xp-letter {
+  color: #f4cf99;
+  text-shadow:
+    0 0 0.04em rgb(255 214 150 / 0.9),
+    0 0 0.22em rgb(228 170 91 / 0.55);
+}
+
+.xp-word.is-lumostudio::after {
+  content: "";
+  position: absolute;
+  inset: -4% -2%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgb(17 17 17 / 0.55) 0 2px,
+    transparent 2px 6px
+  );
+  pointer-events: none;
+}
+
+.xp-caret {
+  align-self: flex-end;
+  width: 0.34em;
+  height: 0.1em;
+  margin: 0 0 0.06em 0.06em;
+  background: #f4cf99;
+  box-shadow: 0 0 0.2em rgb(228 170 91 / 0.7);
+  animation: xp-caret 1s steps(1) infinite;
+}
+
+@keyframes xp-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Borromeo: the Tutto Bene poster — salmon type, navy drop, chequered flag. */
+.xp-word.is-bds .xp-letter {
+  color: #ef9d94;
+  text-shadow: 0.045em 0.045em 0 #232e7a;
+}
+
+.xp-word.is-bds::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -0.16em;
+  left: 0;
+  height: 0.07em;
+  background: repeating-conic-gradient(#232e7a 0 25%, #f4ecd9 0 50%) 0 0 /
+    0.07em 0.07em;
+  transform-origin: left;
+  animation: xp-highlight-flat 700ms cubic-bezier(0.22, 1, 0.36, 1) 200ms both;
+}
+
+@keyframes xp-highlight-flat {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Pasqua: the official wordmark, cut out of the logo file and filled. */
+.xp-logo-word {
+  display: block;
+  height: 0.9em;
+  aspect-ratio: 527 / 158;
+  background: var(--logo-fill, #f4efe6);
+  -webkit-mask: var(--logo) center / contain no-repeat;
+  mask: var(--logo) center / contain no-repeat;
+}
+
+/* SkyCloud: its own wordmark, filled with the film-photo sky from the brand. */
+.xp-logo-word.is-skycloud {
+  aspect-ratio: 1010 / 240;
+  /* The film-photo sky is moody; lift it so the mark reads on black. */
+  filter: brightness(1.35) saturate(1.25);
+}
+
+.xp-word-measure .xp-logo-word {
+  background: none;
+}
+
+.xp-word.is-in .xp-logo-word {
+  animation: xp-logo-in 760ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes xp-logo-in {
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(12%);
+  }
+
+  to {
+    opacity: 1;
+    clip-path: inset(0);
+    transform: none;
+  }
+}
+
+/* --- Cursor bubble ------------------------------------------------------- */
+
+.xp-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.xp-cursor-disc {
+  display: grid;
+  place-items: center;
+  width: 124px;
+  height: 124px;
+  margin: 4px 0 0 -6px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 30px;
+  transform: scale(0);
+  transition:
+    transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 300ms ease,
+    color 300ms ease;
+}
+
+.xp-cursor.is-on .xp-cursor-disc {
+  transform: scale(1);
+}
+
+/* --- Player -------------------------------------------------------------- */
+
+/* The player is its own scrolling page: the record on top, then the story. */
+.xp-player {
+  --deck: min(46vh, 30vw, 440px);
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  color: var(--fg);
+}
+
+.xp-player-backdrop {
+  position: fixed;
+  inset: 0;
+  /* Black like the crate, with only a breath of the record's colour. */
+  background: color-mix(in srgb, var(--tint) 16%, #070708);
+}
+
+.xp-player-scroll:focus {
+  outline: none;
+}
+
+.xp-player-scroll {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(242 239 232 / 0.2) transparent;
+}
+
+.xp-story {
+  position: relative;
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  padding: 0 clamp(22px, 5vw, 72px) 180px;
+}
+
+/* Cover: record on the left, what it is on the right. */
+.xp-story-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-items: center;
+  gap: clamp(28px, 4vw, 72px);
+  min-height: 100svh;
+  padding: 88px 0 72px;
+}
+
+.xp-deck {
+  display: flex;
+  justify-content: center;
+  padding-right: calc(var(--deck) * 0.5);
+}
+
+.xp-deck-flyer {
+  position: relative;
+  flex: none;
+  width: var(--deck);
+  height: var(--deck);
+}
+
+.xp-deck-sleeve {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.08),
+    0 40px 80px -30px rgb(0 0 0 / 0.9),
+    18px 0 40px -18px rgb(0 0 0 / 0.7);
+  animation: xp-fade-in 320ms ease both;
+}
+
+.xp-vinyl-slide {
+  position: absolute;
+  inset: 2.5%;
+  z-index: 1;
+}
+
+.xp-vinyl {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #0d0d0d;
+  box-shadow:
+    0 30px 60px -20px rgb(0 0 0 / 0.9),
+    inset 0 0 0 2px rgb(255 255 255 / 0.04);
+}
+
+.xp-vinyl-spin {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle at center,
+    #111 0 1.5px,
+    #1d1d1d 1.5px 3px
+  );
+  animation: xp-spin 1.8s linear infinite;
+}
+
+.xp-vinyl-label {
+  position: absolute;
+  inset: 32%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgb(0 0 0 / 0.5);
+}
+
+.xp-vinyl-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 30deg,
+    transparent 0 12%,
+    rgb(255 255 255 / 0.1) 18%,
+    transparent 26% 60%,
+    rgb(255 255 255 / 0.08) 66%,
+    transparent 74%
+  );
+  pointer-events: none;
+}
+
+.xp-vinyl-hole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3%;
+  height: 3%;
+  border-radius: 50%;
+  background: #0a0a0a;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes xp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vinyl-label-art {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.vinyl-label-skycloud img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vinyl-label-dawn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vinyl-label-zayno {
+  background: #ffd83d;
+}
+
+.vinyl-label-zayno img {
+  width: 70%;
+  mix-blend-mode: multiply;
+}
+
+.vinyl-label-lumo {
+  background: radial-gradient(circle, #e4aa5b, #b87a2d);
+  color: #1b1e24;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: calc(var(--deck) * 0.05);
+  font-weight: 800;
+}
+
+.vinyl-label-borromeo {
+  background: #232e7a;
+}
+
+.vinyl-label-borromeo img {
+  width: 84%;
+}
+
+.vinyl-label-pasqua {
+  background: #f4ecd9;
+}
+
+.vinyl-label-pasqua img {
+  width: 76%;
+  mix-blend-mode: multiply;
+}
+
+.xp-story-intro {
+  max-width: 34rem;
+}
+
+.xp-player.is-opening .xp-story-intro,
+.xp-player.is-opening .xp-story-body {
+  opacity: 0;
+}
+
+.xp-player.is-open .xp-story-intro > * {
+  animation: xp-rise 680ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.xp-player.is-open .xp-story-intro > :nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.xp-player.is-open .xp-story-intro > :nth-child(3) {
+  animation-delay: 140ms;
+}
+
+.xp-player.is-open .xp-story-intro > :nth-child(n + 4) {
+  animation-delay: 210ms;
+}
+
+.xp-player.is-closing .xp-story-intro,
+.xp-player.is-closing .xp-story-body {
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.xp-story-kicker {
+  margin: 0 0 18px;
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.xp-story-title {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  font-size: clamp(3.2rem, 6vw, 6.2rem);
+}
+
+/* Long words (LUMOSTUDIO, DOMINICANA) step down so they fit the column. */
+.xp-story-title.is-long {
+  font-size: clamp(2.6rem, 4.4vw, 4.6rem);
+}
+
+/* Wordmarks in titles use the plain official white; the photo fills are only
+   legible at crate-headline size. */
+.xp-story-title .xp-logo-word {
+  height: 0.8em;
+  background: #f4efe6;
+}
+
+.xp-story-title .xp-logo-word.is-skycloud {
+  height: 1.05em;
+}
+
+.xp-story-title.is-zayno::before,
+.xp-story-title.is-bds::after {
+  animation-delay: 420ms;
+}
+
+.xp-story-dek {
+  margin: 26px 0 0;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: clamp(1.45rem, 2.1vw, 2.05rem);
+  font-style: italic;
+  line-height: 1.22;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.xp-story-meta {
+  margin: 22px 0 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.xp-story-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  margin-top: 28px;
+}
+
+/* A link that reads like a link, not a SaaS button. */
+.xp-story-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--accent);
+  color: var(--fg);
+  font-family: var(--font-loud), Impact, sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    color 200ms ease,
+    gap 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.xp-story-link svg {
+  color: var(--accent);
+  font-size: 1.1rem;
+}
+
+.xp-story-link:hover {
+  gap: 16px;
+  color: var(--accent);
+}
+
+.xp-story-link:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 6px;
+}
+
+.xp-story-private {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+/* Music: a quiet pill with a tiny equaliser that dances while it plays. */
+.xp-music {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+  padding: 0 16px 0 6px;
+  border: 1px solid rgb(242 239 232 / 0.2);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease;
+}
+
+.xp-music:hover {
+  border-color: var(--accent);
+}
+
+.xp-music:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 3px;
+}
+
+.xp-music-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 13px;
+}
+
+.xp-music-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+.xp-music-bars span {
+  width: 3px;
+  height: 3px;
+  border-radius: 1px;
+  background: var(--accent);
+  transition: height 200ms ease;
+}
+
+.xp-music.is-playing .xp-music-bars span {
+  animation: xp-eq 0.9s ease-in-out infinite;
+}
+
+.xp-music.is-playing .xp-music-bars span:nth-child(2) {
+  animation-delay: -0.3s;
+}
+
+.xp-music.is-playing .xp-music-bars span:nth-child(3) {
+  animation-delay: -0.6s;
+}
+
+@keyframes xp-eq {
+  0%,
+  100% {
+    height: 3px;
+  }
+
+  50% {
+    height: 12px;
+  }
+}
+
+.xp-music.is-compact {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  justify-content: center;
+  border: none;
+}
+
+.xp-music.is-compact .xp-music-bars {
+  display: none;
+}
+
+.xp-music.is-compact .xp-music-icon {
+  width: 38px;
+  height: 38px;
+}
+
+.xp-story-cue {
+  margin: 56px 0 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.xp-story-cue::after {
+  content: "";
+  display: block;
+  width: 1px;
+  height: 44px;
+  margin-top: 14px;
+  background: linear-gradient(var(--muted), transparent);
+  animation: xp-cue 1.8s ease-in-out infinite;
+  transform-origin: top;
+}
+
+@keyframes xp-cue {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* Story */
+
+.xp-story-body {
+  max-width: 1040px;
+}
+
+.xp-chapter {
+  padding-top: clamp(64px, 12vh, 140px);
+}
+
+.xp-chapter-label {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 0 0 28px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.xp-chapter-label span {
+  color: var(--accent);
+  font-family: var(--font-loud), Impact, sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+}
+
+.xp-quote {
+  margin: clamp(80px, 14vh, 160px) 0 0;
+  padding: 0;
+}
+
+.xp-quote p {
+  max-width: 18ch;
+  margin: 0;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: clamp(2.6rem, 5.6vw, 5.4rem);
+  font-style: italic;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.xp-quote p::before {
+  content: "\201C";
+  display: block;
+  height: 0.5em;
+  color: var(--accent);
+  font-size: 1.6em;
+  line-height: 1;
+}
+
+.xp-shot {
+  margin: clamp(80px, 14vh, 160px) 0 0;
+}
+
+.xp-shot img {
+  display: block;
+  width: 100%;
+  max-height: 72vh;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: 0 40px 90px -40px rgb(0 0 0 / 0.9);
+}
+
+.xp-shot figcaption {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+/* Liner notes: typographic, like the back of a sleeve. */
+.xp-liner {
+  margin-top: clamp(96px, 16vh, 180px);
+  padding-top: 28px;
+  border-top: 1px solid rgb(242 239 232 / 0.16);
+}
+
+.xp-liner-title {
+  margin: 0 0 28px;
+  font-family: var(--font-loud), Impact, sans-serif;
+  font-size: clamp(2.4rem, 5vw, 4.4rem);
+  font-weight: 400;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.xp-liner-specs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 40px;
+  margin: 0;
+}
+
+.xp-liner-specs div {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgb(242 239 232 / 0.1);
+}
+
+.xp-liner-specs dt {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.xp-liner-specs dd {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.xp-next {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  margin-top: 72px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+}
+
+.xp-next-sleeve {
+  position: relative;
+  flex: none;
+  width: 88px;
+  height: 88px;
+  overflow: hidden;
+  border-radius: 10px;
+  transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.xp-next-copy {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+}
+
+.xp-next-copy small {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.xp-next-copy strong {
+  font-family: var(--font-loud), Impact, sans-serif;
+  font-size: clamp(2.4rem, 6vw, 5rem);
+  font-weight: 400;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.xp-next > svg {
+  font-size: 2.4rem;
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.xp-next:hover .xp-next-sleeve {
+  transform: rotate(-6deg) scale(1.06);
+}
+
+.xp-next:hover > svg {
+  transform: translateX(8px);
+}
+
+.xp-next:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 8px;
+}
+
+@keyframes xp-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes xp-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Chrome that floats over the story */
+
+.xp-player-close {
+  position: fixed;
+  top: 22px;
+  right: 22px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: var(--fg);
+  color: #111;
+  font-size: 18px;
+  cursor: pointer;
+  transition: transform 220ms ease;
+}
+
+.xp-player-close:hover {
+  transform: rotate(90deg);
+}
+
+.xp-player-close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.xp-nowplaying {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 8px;
+  border: 1px solid rgb(242 239 232 / 0.1);
+  border-radius: 999px;
+  background: rgb(14 14 15 / 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transform: translateX(-50%);
+}
+
+.xp-nowplaying-disc {
+  position: relative;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle, #111 0 1px, #1f1f1f 1px 2px);
+  animation: xp-spin 1.8s linear infinite;
+}
+
+.xp-nowplaying-disc .xp-vinyl-label {
+  --deck: 36px;
+  inset: 30%;
+  box-shadow: none;
+}
+
+.xp-nowplaying-title {
+  display: grid;
+  min-width: 0;
+  max-width: 180px;
+  padding-right: 6px;
+  overflow: hidden;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.xp-nowplaying-title small {
+  color: var(--muted);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+}
+
+.xp-nowplaying button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: rgb(242 239 232 / 0.08);
+  color: var(--fg);
+  cursor: pointer;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+.xp-nowplaying button:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.xp-nowplaying button:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.xp-player.is-opening .xp-nowplaying,
+.xp-player.is-closing .xp-nowplaying,
+.xp-player.is-closing .xp-player-close {
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+/* --- Smaller screens ----------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .xp-player {
+    --deck: min(58vw, 320px);
+  }
+
+  .xp-story-head {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 36px;
+    min-height: 0;
+    padding: 84px 0 24px;
+  }
+
+  .xp-deck {
+    justify-content: flex-start;
+    padding-right: 0;
+  }
+
+  .xp-story-intro {
+    max-width: none;
+  }
+
+  .xp-liner-specs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .xp-page {
+    /* Every sleeve, one grown, gaps and the divider must fit 360px screens. */
+    --crate: clamp(36px, calc((100vw - 93px) / (var(--crate-count, 6) + 0.52)), 50px);
+    --crate-active: calc(var(--crate) * 1.52);
+    padding-top: calc(max(1.15em, env(safe-area-inset-top, 0px)) + 72px);
+  }
+
+  .xp-crate {
+    gap: 14px;
+  }
+
+  .xp-crate-side + .xp-crate-side {
+    padding-left: 14px;
+  }
+
+  .xp-crate-row {
+    gap: 8px;
+  }
+
+  .xp-word-stage {
+    min-height: 30vh;
+  }
+
+  .xp-liner-specs div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  /* Right-anchored and capped so the site's sound toggle (bottom-left, about
+     70px wide) never covers it. */
+  .xp-nowplaying {
+    right: 12px;
+    left: auto;
+    max-width: calc(100vw - 88px);
+    transform: none;
+  }
+
+  .xp-nowplaying-title {
+    max-width: 110px;
+  }
+
+  .xp-next-sleeve {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xp-sleeve,
+  .xp-deck-sleeve,
+  .xp-vinyl-spin,
+  .xp-nowplaying-disc,
+  .xp-caret,
+  .xp-story-cue::after,
+  .xp-word.is-in .xp-letter,
+  .xp-word.is-in .xp-logo-word,
+  .xp-word.is-out,
+  .xp-player.is-open .xp-story-intro > *,
+  .xp-music.is-playing .xp-music-bars span {
+    animation: none;
+  }
+
+  .xp-word.is-out {
+    display: none;
+  }
+
+  .xp-word.is-zayno::before,
+  .xp-word.is-bds::after {
+    animation: none;
+  }
+
+  .xp-sleeve {
+    transition:
+      opacity 300ms ease,
+      filter 300ms ease;
+  }
+
+  .xp-cursor-disc {
+    transition:
+      background-color 300ms ease,
+      color 300ms ease;
+  }
+
+  .xp-story-link,
+  .xp-next-sleeve,
+  .xp-next > svg,
+  .xp-player-close {
+    transition: none;
+  }
+}

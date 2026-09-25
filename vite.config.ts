@@ -15,7 +15,6 @@ const isVercel = Boolean(process.env.VERCEL);
 
 const localBindingConfig = {
   main: "./worker/index.ts",
-  compatibility_flags: ["nodejs_compat"],
   d1_databases: d1
     ? [
         {

@@ -39,10 +39,10 @@ test("server-renders the hero-only portfolio", async () => {
   assert.match(html, /IB student and software developer from Italy/);
   assert.match(html, /introduction/i);
   assert.match(html, /explore/i);
-  // The intro gate title is split into per-word spans by BlurText.
+  // The intro gate server-renders its first greeting; the rest cycle client-side.
   assert.match(html, /class="intro-gate"/);
-  assert.match(html, /Hey,/);
-  assert.match(html, /open site/i);
+  assert.match(html, /<span lang="en">Hello<\/span>/);
+  assert.match(html, /data-intro-seen|dataset\.introSeen/);
   assert.doesNotMatch(html, /id="contact"/i);
   assert.doesNotMatch(html, /CONTACT ME/);
   assert.doesNotMatch(html, /\/stickers\//);

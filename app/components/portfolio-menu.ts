@@ -16,9 +16,9 @@ export const portfolioMenuItems: BubbleMenuItem[] = [
     hoverStyles: { bgColor: "#e9b936", textColor: "#181b20" },
   },
   {
-    label: "work & projects",
-    href: "/work",
-    ariaLabel: "Work and projects",
+    label: "experience",
+    href: "/experience",
+    ariaLabel: "Experience",
     rotation: -4,
     hoverStyles: { bgColor: "#2db4ca", textColor: "#181b20" },
   },

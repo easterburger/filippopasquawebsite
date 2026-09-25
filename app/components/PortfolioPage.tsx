@@ -1,24 +1,22 @@
 "use client";
 
+import { ArrowUpRight, Sparkle, X } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useLayoutEffect, useState } from "react";
 
 import TextFlippingBoardDemo from "@/components/text-flipping-board-demo";
 
-import BlurText from "./BlurText";
 import BubbleMenu from "./BubbleMenu";
-import DecryptedText from "./DecryptedText";
-import HeroActionMark from "./HeroActionMark";
 import IntroGate from "./IntroGate";
+import { INTRO_GATE_KEY } from "./intro-seen";
 import ParticleButton from "./ParticleButton";
 import StyleNote from "./StyleNote";
-import { MeltGooFilter, MeltLayer, useMeltFill } from "./melt-fill";
+import SwingText from "./SwingText";
+import { heroMarks } from "./hero/HeroMarks";
 import { portfolioMenuItems } from "./portfolio-menu";
 
 const HERO_INTRO =
-  "Hi, I'm Filippo Pasqua. I'm an IB student and software developer from Italy.";
-
-const INTRO_GATE_KEY = "fp-intro-gate-seen";
+  "Hi, I'm Filippo Pasqua.\nI'm an IB student and software developer from Italy.";
 
 // The gate must disappear before paint for returning visitors, but useLayoutEffect
 // is a no-op (and warns) during SSR.
@@ -29,28 +27,25 @@ export default function PortfolioPage() {
   const [isHelloOpen, setIsHelloOpen] = useState(false);
   const [menuOpenRequest, setMenuOpenRequest] = useState(0);
   const [chromeReady, setChromeReady] = useState(false);
-  const [introReady, setIntroReady] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
-  const helloMeltProps = useMeltFill();
-  const exploreMeltProps = useMeltFill();
+  const [isGateOpen, setIsGateOpen] = useState(true);
 
   useIsomorphicLayoutEffect(() => {
     try {
       if (window.sessionStorage.getItem(INTRO_GATE_KEY) === "1") {
         setHasEntered(true);
+        setIsGateOpen(false);
       }
     } catch {
       setHasEntered(true);
+      setIsGateOpen(false);
     }
   }, []);
 
   useEffect(() => {
     if (!hasEntered) return;
 
-    const timeout = window.setTimeout(() => {
-      setChromeReady(true);
-      setIntroReady(true);
-    }, 4200);
+    const timeout = window.setTimeout(() => setChromeReady(true), 4200);
     return () => window.clearTimeout(timeout);
   }, [hasEntered]);
 
@@ -63,16 +58,16 @@ export default function PortfolioPage() {
     setHasEntered(true);
   };
 
-  const handleIntroComplete = () => {
-    setIntroReady(true);
-    setChromeReady(true);
-  };
+  const handleIntroComplete = () => setChromeReady(true);
 
   return (
     <>
-      <MeltGooFilter />
-
-      {!hasEntered && <IntroGate onEnter={handleEnterSite} />}
+      {isGateOpen && (
+        <IntroGate
+          onReveal={handleEnterSite}
+          onDone={() => setIsGateOpen(false)}
+        />
+      )}
 
       <main id="top" className="hero-page" inert={!hasEntered}>
         <BubbleMenu
@@ -104,27 +99,14 @@ export default function PortfolioPage() {
         <section id="home" className="hero-only" aria-labelledby="hero-intro">
           <div className={`hero-content${isHelloOpen ? " hello-open" : ""}`}>
             <div id="hero-intro" className="hero-intro">
-              {introReady ? (
-                <DecryptedText
-                  text={HERO_INTRO}
-                  useOriginalCharsOnly
-                  proximityRadius={58}
-                  proximitySpeed={120}
-                  parentClassName="hero-intro-copy"
-                />
-              ) : (
-                <BlurText
-                  text={HERO_INTRO}
-                  animateBy="words"
-                  direction="bottom"
-                  delay={86}
-                  stepDuration={0.42}
-                  threshold={0.1}
-                  active={hasEntered}
-                  className="hero-intro-copy"
-                  onAnimationComplete={handleIntroComplete}
-                />
-              )}
+              <SwingText
+                text={HERO_INTRO}
+                className="hero-intro-copy"
+                revealed={hasEntered}
+                onRevealComplete={handleIntroComplete}
+                marks={heroMarks({ autoStickers: hasEntered })}
+                breeze
+              />
 
               <motion.div
                 className="hero-actions"
@@ -138,31 +120,31 @@ export default function PortfolioPage() {
               >
                 <ParticleButton
                   type="button"
-                  className="hero-action hero-action-hello"
+                  className="hero-cta hero-cta-primary"
                   onClick={() => setIsHelloOpen((isOpen) => !isOpen)}
                   aria-expanded={isHelloOpen}
                   aria-controls="hello-board-panel"
-                  {...helloMeltProps}
                 >
-                  <MeltLayer />
-                  <span className="hero-action-label" data-label="introduction">
-                    <span className="hero-action-default">introduction</span>
+                  <span className="hero-cta-label">Introduction</span>
+                  <span className="hero-cta-chip" aria-hidden="true">
+                    {isHelloOpen ? (
+                      <X weight="bold" />
+                    ) : (
+                      <Sparkle weight="fill" />
+                    )}
                   </span>
-                  <HeroActionMark kind="spark" />
                 </ParticleButton>
 
                 <button
                   type="button"
-                  className="hero-action hero-action-explore"
+                  className="hero-cta hero-cta-secondary"
                   onClick={() => setMenuOpenRequest((request) => request + 1)}
                   aria-label="Explore the portfolio menu"
-                  {...exploreMeltProps}
                 >
-                  <MeltLayer />
-                  <span className="hero-action-label" data-label="explore">
-                    <span className="hero-action-default">explore</span>
+                  <span className="hero-cta-label">Explore</span>
+                  <span className="hero-cta-chip" aria-hidden="true">
+                    <ArrowUpRight weight="bold" />
                   </span>
-                  <HeroActionMark kind="explore" />
                 </button>
               </motion.div>
             </div>

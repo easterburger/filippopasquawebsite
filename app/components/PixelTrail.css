@@ -1,0 +1,20 @@
+.pixel-trail-goo {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Sits above the page-transition overlay (z-index 200). Difference-blended white
+   reads as ink on the paper pages and as light on the dark and photo ones. */
+.pixel-trail {
+  position: fixed;
+  z-index: 300;
+  pointer-events: none;
+  image-rendering: pixelated;
+  mix-blend-mode: difference;
+}
+
+.pixel-trail[data-active="false"] {
+  visibility: hidden;
+}

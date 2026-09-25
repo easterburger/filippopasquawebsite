@@ -22,7 +22,12 @@ export type VoiceName =
   | "bookSlide"
   | "pageFlip"
   | "pageTurn"
-  | "thump";
+  | "thump"
+  | "crateFlick"
+  | "sleeveSlide"
+  | "vinylSlide"
+  | "needleDrop"
+  | "vinylBack";
 
 const MASTER_GAIN = 0.3;
 /** Beyond this many scheduled voices at once, new hits are dropped. */
@@ -610,6 +615,97 @@ export class RetroSoundEngine {
           q: 0.7,
           type: "lowpass",
         });
+        break;
+
+      // Fingers flicking past a record sleeve in a crate: a dry paper tick
+      // with a little cardboard body under it.
+      case "crateFlick":
+        this.burst({
+          start: now,
+          duration: 0.016,
+          frequency: vary(1900, 0.18),
+          gain: 0.08,
+          q: 0.8,
+        });
+        this.burst({
+          start: now + 0.004,
+          duration: 0.024,
+          frequency: vary(320, 0.15),
+          gain: 0.07,
+          q: 0.6,
+          type: "lowpass",
+        });
+        break;
+
+      // A sleeve pulled out of the crate and through the air.
+      case "sleeveSlide":
+        this.paperWhoosh({
+          start: now,
+          duration: 0.45,
+          gain: 0.08,
+          freqFrom: vary(380, 0.1),
+          freqPeak: vary(1500, 0.1),
+          freqTo: vary(700, 0.1),
+        });
+        this.paperCrackle({ start: now + 0.04, duration: 0.24, gain: 0.018 });
+        break;
+
+      // The disc easing out of its paper inner sleeve: a long, soft friction
+      // swell that stays low so it never sounds like wind.
+      case "vinylSlide":
+        this.paperWhoosh({
+          start: now,
+          duration: 0.6,
+          gain: 0.065,
+          freqFrom: vary(260, 0.1),
+          freqPeak: vary(880, 0.1),
+          freqTo: vary(420, 0.1),
+        });
+        this.paperCrackle({ start: now + 0.08, duration: 0.42, gain: 0.014 });
+        break;
+
+      // Tonearm down: a soft low thud, then a few specks of surface crackle.
+      case "needleDrop": {
+        this.tone({
+          start: now,
+          duration: 0.08,
+          from: vary(92, 0.08),
+          to: 46,
+          gain: 0.1,
+          type: "triangle",
+          lowpass: 260,
+        });
+        this.burst({
+          start: now,
+          duration: 0.022,
+          frequency: vary(420, 0.15),
+          gain: 0.08,
+          q: 0.7,
+          type: "lowpass",
+        });
+        for (let tick = 0; tick < 7; tick += 1) {
+          this.burst({
+            start: now + 0.05 + Math.random() * 0.4,
+            duration: 0.003 + Math.random() * 0.003,
+            frequency: vary(3800, 0.3),
+            gain: 0.025 + Math.random() * 0.035,
+            q: 1.4,
+          });
+        }
+        break;
+      }
+
+      // The disc sliding back into its sleeve, shorter and lower, settling.
+      case "vinylBack":
+        this.paperWhoosh({
+          start: now,
+          duration: 0.36,
+          gain: 0.055,
+          freqFrom: vary(640, 0.1),
+          freqPeak: vary(760, 0.1),
+          freqTo: vary(260, 0.1),
+        });
+        this.paperSettle({ start: now + 0.34, gain: 0.045 });
         break;
 
       // Dot-matrix / teletype tick used while text animates in.
