@@ -1,0 +1,106 @@
+/* Book covers shared by the Education library and the home desk. Sized in
+   em: the global .bookcover sets font-size to a fourteenth of the cover width
+   (--w), so the same cover works on a shelf, in a hand, or on the desk. */
+
+.edu-cover-ib {
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 0 0 2em 1.5em;
+  background: #f2ede1;
+  color: #16181c;
+  text-align: left;
+}
+
+.edu-cover-ib-bands {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  width: 30%;
+}
+
+.edu-cover-ib-bands span {
+  flex: 1;
+}
+
+.edu-cover-ib-bands span:nth-child(-n + 3) {
+  flex: 1.6;
+}
+
+.edu-cover-ib-word {
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 5.4em;
+  font-weight: 900;
+  line-height: 0.85;
+}
+
+.edu-cover-ib-title {
+  max-width: 62%;
+  margin-top: 0.4em;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.1em;
+  font-style: italic;
+  line-height: 1.1;
+}
+
+.edu-cover-ib-foot {
+  max-width: 62%;
+  margin-top: 1em;
+  font-size: 0.5em;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.edu-cover-oxford {
+  padding-top: 3.2em;
+  background: linear-gradient(180deg, #0a1b3a 0%, #0f2750 60%, #163566 100%);
+  color: #e9d29c;
+}
+
+.edu-cover-oxford-frame {
+  position: absolute;
+  inset: 0.7em;
+  border: 1px solid rgb(217 180 106 / 0.8);
+  box-shadow:
+    inset 0 0 0 0.25em #0f2750,
+    inset 0 0 0 calc(0.25em + 1px) rgb(217 180 106 / 0.6);
+}
+
+.edu-cover-oxford-title {
+  position: relative;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 2.9em;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.edu-cover-oxford-sub {
+  position: relative;
+  margin-top: 0.7em;
+  font-size: 0.56em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.edu-cover-oxford-foot {
+  position: relative;
+  margin-top: 0.4em;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 0.8em;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.edu-cover-oxford-skyline {
+  position: absolute;
+  right: 0.7em;
+  bottom: 0.7em;
+  left: 0.7em;
+  width: calc(100% - 1.4em);
+  height: 34%;
+  fill: #d9b46a;
+}
