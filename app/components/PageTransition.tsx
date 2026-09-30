@@ -27,6 +27,9 @@ const PageTransitionContext = createContext<PageTransitionContextValue | null>(
 // Top origin: cover drops down; reveal lifts up (new page appears bottom → top).
 const CURTAIN_ORIGIN = "50% 0%";
 
+/** Fired on window just before a page transition starts to cover the page. */
+export const BEFORE_NAVIGATE_EVENT = "fp:before-navigate";
+
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
@@ -150,6 +153,8 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
       isAnimatingRef.current = true;
       pendingRevealRef.current = true;
       pendingHashRef.current = target.hash || null;
+      // Anything playing (the home radio) stops before the curtain covers it.
+      window.dispatchEvent(new Event(BEFORE_NAVIGATE_EVENT));
 
       void cover(options.alreadyCovered)
         .then(() => {

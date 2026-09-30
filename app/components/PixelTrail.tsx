@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
+import { subscribeCursorExclusion, type ExclusionRect } from "./cursor-exclusion";
 import "./PixelTrail.css";
 
 // Port of React Bits' <PixelTrail />. The original feeds drei's trail texture (a
@@ -107,6 +108,19 @@ export default function PixelTrail({
       let side = 0;
       let offsetX = 0;
       let offsetY = 0;
+      let exclusion: ExclusionRect | null = null;
+      // Cut a hole where the radio's video is, so the trail never covers it.
+      const clip = () => {
+        if (!exclusion) {
+          canvas.style.clipPath = "";
+          return;
+        }
+        const x1 = exclusion.left - offsetX;
+        const y1 = exclusion.top - offsetY;
+        const x2 = x1 + exclusion.width;
+        const y2 = y1 + exclusion.height;
+        canvas.style.clipPath = `polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, ${x1}px ${y1}px, ${x2}px ${y1}px, ${x2}px ${y2}px, ${x1}px ${y2}px, ${x1}px ${y1}px)`;
+      };
       const layout = () => {
         side = Math.max(window.innerWidth, window.innerHeight);
         offsetX = (window.innerWidth - side) / 2;
@@ -114,8 +128,13 @@ export default function PixelTrail({
         canvas.style.width = canvas.style.height = `${side}px`;
         canvas.style.left = `${offsetX}px`;
         canvas.style.top = `${offsetY}px`;
+        clip();
       };
       layout();
+      const stopExclusion = subscribeCursorExclusion((rect) => {
+        exclusion = rect;
+        clip();
+      });
 
       let trail: TrailPoint[] = [];
       let force = 0;
@@ -232,6 +251,8 @@ export default function PixelTrail({
       return () => {
         window.removeEventListener("pointermove", onPointerMove);
         window.removeEventListener("resize", layout);
+        stopExclusion();
+        canvas.style.clipPath = "";
         cancelAnimationFrame(frame);
         pixelCtx.clearRect(0, 0, gridSize, gridSize);
         canvas.dataset.active = "false";

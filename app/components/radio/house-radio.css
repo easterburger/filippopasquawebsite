@@ -1,0 +1,1234 @@
+/* FP FM. One black island at the foot of the page that springs between three
+   faces, Dynamic Island style: a small radio (idle), a live player (folded
+   while music plays) and the whole hi-fi (open). Every face is always laid
+   out; the island animates to the measured size of the active one while the
+   faces cross-fade through a blur. */
+
+.house-radio {
+  --radio-ink: #070708;
+  --radio-paper: #f1efe6;
+  --radio-muted: rgb(241 239 230 / 0.64);
+  --radio-faint: rgb(241 239 230 / 0.12);
+  --radio-blue: #1a55ff;
+  --radio-lcd: #cfdcff;
+  --radio-lamp: #ff5a47;
+  --radio-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --radio-bottom: max(2em, calc(env(safe-area-inset-bottom, 0px) + 1em));
+  --radio-w: min(944px, calc(100vw - 48px));
+  --screen-w: 356px;
+  --screen-h: 200px;
+
+  position: fixed;
+  left: 50%;
+  /* Bottom edge in line with the sound and style buttons in the corners. */
+  bottom: var(--radio-bottom);
+  z-index: 97;
+  font-family: var(--font-primary), Arial, sans-serif;
+  opacity: 0;
+  translate: -50% 22px;
+  transition:
+    opacity 500ms ease,
+    translate 700ms var(--radio-ease);
+}
+
+.house-radio.is-ready {
+  opacity: 1;
+  translate: -50% 0;
+}
+
+.radio-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The island ----------------------------------------------------------------- */
+
+.radio-island {
+  position: relative;
+  width: 214px;
+  height: 84px;
+  overflow: hidden;
+  border-radius: 30px;
+  background:
+    radial-gradient(130% 110% at 28% 0%, rgb(255 255 255 / 0.08), transparent 55%),
+    var(--radio-ink);
+  color: var(--radio-paper);
+  box-shadow:
+    0 20px 44px rgb(10 12 16 / 0.3),
+    0 3px 8px rgb(10 12 16 / 0.18),
+    inset 0 0 0 1px rgb(255 255 255 / 0.07);
+}
+
+@supports (corner-shape: squircle) {
+  .radio-island {
+    corner-shape: squircle;
+  }
+}
+
+/* Faces sit at the island's bottom centre, the point it grows from, so the
+   island seems to open around them. */
+.radio-layer {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  translate: -50% 0;
+  opacity: 0;
+  filter: blur(10px);
+  transform: scale(0.94);
+  pointer-events: none;
+  transition:
+    opacity 160ms ease,
+    filter 220ms ease,
+    transform 380ms var(--radio-ease);
+}
+
+.radio-layer[data-active="true"] {
+  opacity: 1;
+  filter: none;
+  transform: none;
+  pointer-events: auto;
+  transition-delay: 110ms;
+  transition-duration: 280ms, 320ms, 480ms;
+}
+
+.radio-slot {
+  width: var(--screen-w);
+  height: var(--screen-h);
+}
+
+/* The antenna: part of the radio, out of the island's clip. */
+.radio-antenna {
+  position: absolute;
+  top: 2px;
+  right: 34px;
+  width: 2px;
+  height: 40px;
+  border-radius: 1px;
+  background: linear-gradient(180deg, #c5cad3, #4a4e57);
+  transform-origin: 50% 100%;
+  translate: 0 -100%;
+  rotate: 18deg;
+  transition:
+    rotate 700ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    height 600ms var(--radio-ease);
+}
+
+.radio-antenna::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #eef1f6, #6b707a);
+  translate: -50% 0;
+}
+
+.house-radio:hover .radio-antenna {
+  rotate: 26deg;
+}
+
+.house-radio:not([data-view="idle"]) .radio-antenna {
+  height: 54px;
+  rotate: 12deg;
+}
+
+/* Idle: a small radio -------------------------------------------------------- */
+
+.radio-face {
+  display: grid;
+  grid-template-columns: 60px auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px 12px 12px;
+  border: 0;
+  border-radius: 30px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.radio-face:focus-visible {
+  outline: 2px solid var(--radio-lcd);
+  outline-offset: -3px;
+}
+
+.radio-grille {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgb(255 255 255 / 0.3) 1.1px, transparent 1.5px) 0 0 / 6px 6px,
+    radial-gradient(circle at 35% 30%, #2b2e35, #111216 72%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.09),
+    inset 0 -8px 14px rgb(0 0 0 / 0.55),
+    0 1px 0 rgb(255 255 255 / 0.05);
+  transition: filter 300ms ease;
+}
+
+.radio-grille::after {
+  content: "";
+  position: absolute;
+  inset: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #34373f, #15161a);
+  box-shadow: 0 0 0 2px rgb(0 0 0 / 0.35);
+}
+
+.radio-face:hover .radio-grille {
+  filter: brightness(1.25);
+}
+
+.radio-face-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 112px;
+}
+
+.radio-face-lcd {
+  display: grid;
+  gap: 3px;
+  padding: 6px 8px 5px;
+  overflow: hidden;
+  /* The scrolling name slides in and out of the glass, not off a hard edge. */
+  mask-image: linear-gradient(90deg, transparent, #000 8px, #000 calc(100% - 8px), transparent);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #0d1a3a, #081127);
+  box-shadow:
+    inset 0 0 0 1px rgb(120 160 255 / 0.2),
+    inset 0 0 16px rgb(40 90 255 / 0.28);
+}
+
+.radio-face-freq {
+  color: var(--radio-lcd);
+  font-size: 1.08rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  text-shadow: 0 0 12px rgb(120 160 255 / 0.55);
+}
+
+.radio-face-freq small {
+  margin-left: 4px;
+  color: rgb(207 220 255 / 0.66);
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  text-shadow: none;
+}
+
+.radio-face-marquee {
+  display: flex;
+  width: max-content;
+  color: rgb(207 220 255 / 0.76);
+  font-size: 0.52rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  animation: radio-marquee 11s linear infinite;
+}
+
+@keyframes radio-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.radio-face-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.radio-knob {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, #30333b 0 7deg, #191b20 7deg 14deg);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.1),
+    0 1px 2px rgb(0 0 0 / 0.5);
+  transition: rotate 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.radio-knob::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  width: 2px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--radio-paper);
+  translate: -50% 0;
+}
+
+.radio-face:hover .radio-knob {
+  rotate: 70deg;
+}
+
+.radio-presets {
+  display: flex;
+  gap: 4px;
+}
+
+.radio-presets i {
+  width: 10px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgb(241 239 230 / 0.18);
+}
+
+.radio-power {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: var(--radio-blue);
+  color: #fff;
+  box-shadow: 0 0 0 0 rgb(26 85 255 / 0.5);
+  transition: box-shadow 320ms ease;
+}
+
+.radio-power svg {
+  width: 13px;
+  height: 13px;
+}
+
+.radio-face:hover .radio-power {
+  box-shadow: 0 0 0 5px rgb(26 85 255 / 0.22);
+}
+
+/* Shared bits ---------------------------------------------------------------- */
+
+.radio-onair-lamp {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: rgb(255 90 71 / 0.4);
+}
+
+[data-status="playing"] .radio-onair-lamp {
+  background: var(--radio-lamp);
+  box-shadow:
+    0 0 0 3px rgb(255 90 71 / 0.18),
+    0 0 12px rgb(255 90 71 / 0.8);
+}
+
+[data-status="tuning"] .radio-onair-lamp {
+  background: var(--radio-lamp);
+  animation: radio-blink 0.9s steps(2, jump-none) infinite;
+}
+
+@keyframes radio-blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+.radio-button,
+.radio-chip {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--radio-faint);
+  color: var(--radio-paper);
+  cursor: pointer;
+  transition:
+    background-color 200ms ease,
+    transform 160ms ease;
+}
+
+.radio-chip {
+  width: 30px;
+  height: 30px;
+}
+
+.radio-button:hover,
+.radio-chip:hover {
+  background: rgb(241 239 230 / 0.2);
+}
+
+.radio-button:active,
+.radio-chip:active {
+  transform: scale(0.92);
+}
+
+.radio-button svg {
+  width: 15px;
+  height: 15px;
+}
+
+.radio-chip svg {
+  width: 13px;
+  height: 13px;
+}
+
+.radio-stop:hover {
+  background: rgb(255 90 71 / 0.24);
+  color: #ffd9d3;
+}
+
+.radio-play {
+  width: 42px;
+  height: 42px;
+  background: var(--radio-blue);
+  color: #fff;
+}
+
+.radio-play:hover {
+  background: #3a6bff;
+}
+
+.radio-play svg {
+  width: 17px;
+  height: 17px;
+}
+
+[data-status="blocked"] .radio-play {
+  animation: radio-nudge 1.2s var(--radio-ease) infinite;
+}
+
+@keyframes radio-nudge {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(26 85 255 / 0.6);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgb(26 85 255 / 0);
+  }
+}
+
+/* Bars that dance at about 124 bpm while a record plays. */
+.radio-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 18px;
+  margin: 0 auto 0 8px;
+}
+
+.radio-eq span {
+  width: 3px;
+  height: 100%;
+  border-radius: 1px;
+  background: linear-gradient(0deg, var(--radio-blue), var(--radio-lcd));
+  transform: scaleY(0.2);
+  transform-origin: bottom;
+  animation: radio-eq 0.484s ease-in-out infinite alternate paused;
+}
+
+.radio-eq span:nth-child(3n + 2) {
+  animation-duration: 0.726s;
+  animation-delay: -0.2s;
+}
+
+.radio-eq span:nth-child(3n) {
+  animation-duration: 0.363s;
+  animation-delay: -0.1s;
+}
+
+.radio-eq span:nth-child(4n) {
+  animation-duration: 0.968s;
+  animation-delay: -0.4s;
+}
+
+.radio-eq span:nth-child(5n) {
+  animation-duration: 0.605s;
+  animation-delay: -0.3s;
+}
+
+[data-status="playing"] .radio-eq span {
+  animation-play-state: running;
+}
+
+@keyframes radio-eq {
+  from {
+    transform: scaleY(0.2);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.radio-button:focus-visible,
+.radio-chip:focus-visible,
+.radio-live-track:focus-visible,
+.radio-youtube:focus-visible,
+.radio-volume:focus-visible {
+  outline: 2px solid var(--radio-lcd);
+  outline-offset: 2px;
+}
+
+/* The video ------------------------------------------------------------------ */
+
+.radio-screen-frame {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  z-index: 3;
+  width: var(--screen-w);
+  height: var(--screen-h);
+  margin-left: calc(var(--screen-w) / -2);
+  overflow: hidden;
+  border-radius: 8px;
+  background:
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.03) 0 1px, transparent 1px 3px),
+    radial-gradient(circle at 50% 45%, #232833, #0b0d10 72%);
+}
+
+.radio-screen-frame::before {
+  content: "FP FM";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgb(241 239 230 / 0.18);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.6rem;
+  font-style: italic;
+  letter-spacing: -0.02em;
+}
+
+.house-radio[data-view="idle"] .radio-screen-frame {
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s 320ms;
+}
+
+.radio-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.radio-screen iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.radio-screen-note {
+  position: absolute;
+  inset: auto 12px 12px;
+  margin: 0;
+  color: var(--radio-muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+/* Live: folded, still playing ----------------------------------------------- */
+
+.radio-layer-live {
+  display: grid;
+  grid-template-columns: var(--screen-w) 186px;
+  gap: 14px;
+  padding: 8px 12px 8px 8px;
+}
+
+.radio-live-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 6px 0 2px;
+}
+
+.radio-live-top {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--radio-muted);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+[data-status="playing"] .radio-live-status {
+  color: var(--radio-paper);
+}
+
+.radio-live-freq {
+  margin-left: auto;
+  color: var(--radio-lcd);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+}
+
+.radio-live-track {
+  display: grid;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--radio-paper);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.radio-live-title {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.radio-live-artist {
+  overflow: hidden;
+  color: var(--radio-muted);
+  font-size: 0.76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.radio-live-eq {
+  gap: 3px;
+  height: 22px;
+  margin: auto 0 0;
+}
+
+.radio-live-eq span {
+  width: 4px;
+}
+
+.radio-live-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.radio-live-controls .radio-play {
+  width: 38px;
+  height: 38px;
+}
+
+.radio-live-controls .radio-button:not(.radio-play) {
+  width: 32px;
+  height: 32px;
+}
+
+/* Open: the whole hi-fi ------------------------------------------------------ */
+
+.radio-layer-open {
+  display: grid;
+  grid-template-columns: var(--screen-w) minmax(0, 1fr) 236px;
+  grid-template-rows: 30px 1fr;
+  grid-template-areas:
+    "screen head head"
+    "screen tuner stations";
+  column-gap: 20px;
+  row-gap: 8px;
+  width: var(--radio-w);
+  padding: 16px;
+}
+
+.radio-layer-open .radio-slot {
+  grid-area: screen;
+}
+
+.radio-header {
+  display: flex;
+  grid-area: head;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.radio-brand {
+  margin: 0;
+  color: var(--radio-paper);
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: 1.3rem;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.radio-brand span {
+  color: var(--radio-lcd);
+}
+
+.radio-onair {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--radio-muted);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+[data-status="playing"] .radio-onair {
+  color: var(--radio-paper);
+}
+
+.radio-youtube {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  color: var(--radio-muted);
+  font-size: 0.72rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 200ms ease;
+}
+
+.radio-youtube:hover {
+  color: var(--radio-paper);
+}
+
+.radio-youtube svg {
+  width: 11px;
+  height: 11px;
+}
+
+.radio-tuner {
+  display: flex;
+  grid-area: tuner;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+}
+
+.radio-display {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.radio-frequency {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 0;
+  color: var(--radio-lcd);
+  font-size: 2.1rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  text-shadow: 0 0 18px rgb(120 160 255 / 0.45);
+}
+
+.radio-frequency span {
+  color: var(--radio-muted);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-shadow: none;
+}
+
+.radio-track {
+  min-width: 0;
+  transition: opacity 160ms ease;
+}
+
+.radio-track.is-preview {
+  opacity: 0.62;
+}
+
+.radio-track p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.radio-track-title {
+  font-size: 0.98rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.radio-track-artist {
+  color: var(--radio-muted);
+  font-size: 0.78rem;
+}
+
+/* The dial runs '87 to '99: every station sits at its year. */
+.radio-dial {
+  position: relative;
+  height: 34px;
+  cursor: ew-resize;
+  touch-action: none;
+  user-select: none;
+}
+
+.radio-dial-ticks {
+  position: absolute;
+  inset: 0;
+}
+
+.radio-dial-tick {
+  position: absolute;
+  bottom: 0;
+  width: 1px;
+  height: 5px;
+  background: rgb(241 239 230 / 0.24);
+}
+
+.radio-dial-tick.is-major {
+  height: 9px;
+  background: rgb(241 239 230 / 0.46);
+}
+
+.radio-dial-tick em {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  color: rgb(241 239 230 / 0.56);
+  font-size: 0.58rem;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  translate: -50% 0;
+}
+
+.radio-dial-station {
+  position: absolute;
+  top: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgb(143 169 255 / 0.45);
+  translate: -50% 0;
+  transition:
+    background-color 240ms ease,
+    box-shadow 240ms ease;
+}
+
+.radio-dial-station.is-current {
+  background: var(--radio-lcd);
+  box-shadow: 0 0 8px rgb(143 169 255 / 0.9);
+}
+
+.radio-dial-needle {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: var(--radio-needle);
+  width: 2px;
+  border-radius: 1px;
+  background: var(--radio-lamp);
+  box-shadow: 0 0 10px rgb(255 90 71 / 0.7);
+  translate: -50% 0;
+  transition: left 620ms cubic-bezier(0.34, 1.5, 0.64, 1);
+}
+
+.radio-dial.is-dragging .radio-dial-needle {
+  transition: none;
+}
+
+.radio-progress {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  color: var(--radio-muted);
+  font-size: 0.64rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.radio-progress-bar {
+  position: relative;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--radio-faint);
+}
+
+.radio-progress-bar span {
+  position: absolute;
+  inset: 0;
+  background: var(--radio-lcd);
+  transform-origin: left;
+  transition: transform 500ms linear;
+}
+
+.radio-transport {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.radio-mute {
+  width: 30px;
+  height: 30px;
+  background: transparent;
+}
+
+.radio-volume {
+  width: 84px;
+  height: 18px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+}
+
+/* iOS can't set volume from a page; only the mute button works there. */
+.is-volume-fixed .radio-volume {
+  display: none;
+}
+
+.radio-volume::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--radio-lcd) var(--radio-volume),
+    var(--radio-faint) var(--radio-volume)
+  );
+}
+
+.radio-volume::-moz-range-track {
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--radio-lcd) var(--radio-volume),
+    var(--radio-faint) var(--radio-volume)
+  );
+}
+
+.radio-volume::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+  margin-top: -4.5px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--radio-paper);
+  appearance: none;
+}
+
+.radio-volume::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--radio-paper);
+}
+
+.radio-stations {
+  display: flex;
+  grid-area: stations;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.radio-stations-label {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  padding: 0 8px;
+  color: var(--radio-muted);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.radio-station-list {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  max-height: 160px;
+  padding: 6px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-block: 14px;
+  scrollbar-color: rgb(241 239 230 / 0.2) transparent;
+  scrollbar-width: thin;
+  /* Rows fade at the edges rather than being cut off. */
+  mask-image: linear-gradient(180deg, transparent, #000 12px, #000 calc(100% - 12px), transparent);
+}
+
+.radio-station {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: rgb(241 239 230 / 0.8);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.radio-station:hover {
+  background: rgb(241 239 230 / 0.06);
+  color: var(--radio-paper);
+}
+
+.radio-station.is-current {
+  background: rgb(241 239 230 / 0.1);
+  color: var(--radio-paper);
+}
+
+.radio-station:focus-visible {
+  outline: 2px solid var(--radio-lcd);
+  outline-offset: -2px;
+}
+
+.radio-station-freq {
+  color: var(--radio-muted);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.radio-station.is-current .radio-station-freq {
+  color: var(--radio-lcd);
+}
+
+.radio-station-text {
+  display: grid;
+  min-width: 0;
+}
+
+.radio-station-title,
+.radio-station-artist {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.radio-station-title {
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.radio-station-artist {
+  color: var(--radio-muted);
+  font-size: 0.66rem;
+  line-height: 1.25;
+}
+
+.radio-station-year {
+  color: var(--radio-muted);
+  font-size: 0.66rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.radio-station.is-broken {
+  opacity: 0.4;
+}
+
+.radio-station.is-broken .radio-station-title {
+  text-decoration: line-through;
+}
+
+@media (pointer: coarse) {
+  .radio-chip,
+  .radio-mute {
+    width: 40px;
+    height: 40px;
+  }
+
+  .radio-youtube {
+    padding-block: 10px;
+  }
+}
+
+/* Narrower windows: the stations drop under the screen and tuner. */
+@media (max-width: 1099px) {
+  .house-radio {
+    --radio-w: min(724px, calc(100vw - 32px));
+  }
+
+  .radio-layer-open {
+    grid-template-columns: var(--screen-w) minmax(0, 1fr);
+    grid-template-rows: 30px 162px auto;
+    grid-template-areas:
+      "screen head"
+      "screen tuner"
+      "stations stations";
+  }
+
+  .radio-station-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 6px;
+    max-height: 124px;
+  }
+}
+
+/* Phones: one column, the video as wide as the radio. */
+@media (max-width: 640px) {
+  .house-radio {
+    --radio-w: calc(100vw - 20px);
+    --screen-w: calc(100vw - 44px);
+    --screen-h: max(200px, calc((100vw - 44px) * 0.5625));
+  }
+
+  .radio-layer-live {
+    grid-template-columns: var(--screen-w);
+    gap: 10px;
+    width: var(--radio-w);
+    padding: 12px;
+  }
+
+  .radio-live-side {
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+  }
+
+  .radio-live-top,
+  .radio-live-eq {
+    display: none;
+  }
+
+  .radio-live-track {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .radio-live-title {
+    font-size: 0.92rem;
+    -webkit-line-clamp: 1;
+  }
+
+  .radio-layer-open {
+    grid-template-columns: var(--screen-w);
+    grid-template-rows: auto;
+    grid-template-areas:
+      "head"
+      "screen"
+      "tuner"
+      "stations";
+    row-gap: 12px;
+    padding: 14px 12px 12px;
+  }
+
+  .radio-youtube {
+    font-size: 0.68rem;
+  }
+
+  .radio-station-list {
+    grid-template-columns: minmax(0, 1fr);
+    max-height: clamp(84px, calc(100dvh - 620px), 156px);
+  }
+
+  .radio-volume {
+    width: 72px;
+  }
+
+  /* Too short for the list: prev and next still tune. */
+  @media (max-height: 600px) {
+    .radio-stations {
+      display: none;
+    }
+  }
+
+  /* The live and open radio fill the foot of the screen; the corner buttons
+     wait behind it rather than poking out underneath. */
+  body:has(.house-radio:not([data-view="idle"])) :is(.sound-toggle, .style-note) {
+    visibility: hidden;
+  }
+}
+
+/* While the live player sits at the foot of the page, the sentence above it
+   lifts just enough that the buttons under it stay clear. */
+.hero-page .hero-intro {
+  transition:
+    left 900ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 900ms cubic-bezier(0.22, 1, 0.36, 1),
+    top 700ms var(--radio-ease, ease);
+}
+
+body:has(.house-radio[data-view="live"]) .hero-page .hero-intro {
+  top: min(50%, calc(100% - 440px));
+}
+
+@media (max-width: 920px) {
+  .hero-page .hero-content {
+    transition: padding-bottom 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  body:has(.house-radio[data-view="live"]) .hero-page .hero-content {
+    padding-bottom: 272px;
+  }
+
+  /* Here the sentence is in the flow; the padding above does the lifting. */
+  body:has(.house-radio[data-view="live"]) .hero-page .hero-intro {
+    top: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  body:has(.house-radio[data-view="live"]) .hero-page .hero-content {
+    padding-bottom: calc(max(200px, (100vw - 44px) * 0.5625) + 130px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radio-layer,
+  .radio-antenna,
+  .radio-knob,
+  .radio-dial-needle,
+  .radio-progress-bar span {
+    transition-duration: 1ms;
+  }
+
+  .radio-face-marquee,
+  .radio-eq span,
+  [data-status="tuning"] .radio-onair-lamp,
+  [data-status="blocked"] .radio-play {
+    animation: none;
+  }
+
+  [data-status="playing"] .radio-eq span {
+    transform: scaleY(0.6);
+  }
+}
