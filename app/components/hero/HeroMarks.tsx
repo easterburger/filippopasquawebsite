@@ -1,6 +1,6 @@
 "use client";
 
-import { HandWaving, MapPin, SealCheck } from "@phosphor-icons/react";
+import { HandWaving, MapPin, SealCheck, Smiley } from "@phosphor-icons/react";
 import {
   useEffect,
   useRef,
@@ -21,8 +21,7 @@ import "./hero-marks.css";
 // (through SwingText's marks) and are all decoration: the sentence itself is
 // read from SwingText's screen-reader copy.
 
-/** Swap this for a current photo; the avatar is a square crop of the face. */
-const AVATAR_SRC = "/hero-assets/filippo-avatar.webp";
+/** The photo in the profile card; swap it for a current one. */
 const CARD_PHOTO_SRC = "/hero-assets/filippo-card.webp";
 
 const subscribeNothing = () => () => {};
@@ -100,8 +99,11 @@ function AccountBadge({ children }: { children: ReactNode }) {
   return (
     <span ref={ref} className={`hero-mark hero-badge${open ? " is-open" : ""}`} {...handlers}>
       <span className="hero-badge-pill" aria-hidden="true" />
+      {/* A smiley in the avatar spot, turning like a coin. */}
       <span className="hero-badge-avatar" aria-hidden="true">
-        {client ? <img src={AVATAR_SRC} alt="" width={240} height={240} /> : null}
+        <span className="hero-badge-face">
+          <Smiley weight="fill" />
+        </span>
       </span>
       {children}
       <span className="hero-badge-check" aria-hidden="true">
