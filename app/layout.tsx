@@ -5,9 +5,9 @@ import { headers } from "next/headers";
 import { SoundProvider } from "@/components/sound/SoundProvider";
 import SoundToggle from "@/components/sound/SoundToggle";
 
+import CursorTrail from "./components/CursorTrail";
 import { INTRO_SEEN_SCRIPT } from "./components/intro-seen";
 import { PageTransitionProvider } from "./components/PageTransition";
-import PixelTrail from "./components/PixelTrail";
 import "./globals.css";
 
 const interTight = Inter_Tight({
@@ -86,7 +86,7 @@ export default function RootLayout({
           <PageTransitionProvider>{children}</PageTransitionProvider>
           <SoundToggle />
         </SoundProvider>
-        <PixelTrail />
+        <CursorTrail />
       </body>
     </html>
   );

@@ -2,12 +2,14 @@
 
 import { ArrowDown, ArrowUpRight, Check, Sparkle, X } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import TextFlippingBoardDemo from "@/components/text-flipping-board-demo";
 
 import BalloonLogo from "./BalloonLogo";
 import BubbleMenu from "./BubbleMenu";
+import CursorSwitch from "./CursorSwitch";
+import { useCursorEffectsAvailable, useCursorMode } from "./cursor-mode";
 import IntroGate from "./IntroGate";
 import { INTRO_GATE_KEY } from "./intro-seen";
 import ParticleButton from "./ParticleButton";
@@ -15,6 +17,9 @@ import StyleNote from "./StyleNote";
 import SwingText from "./SwingText";
 import { heroMarks } from "./hero/HeroMarks";
 import { portfolioMenuItems } from "./portfolio-menu";
+
+// WebGL and ogl only load for visitors who pick the ripples.
+const RippleDistortion = lazy(() => import("./RippleDistortion"));
 
 const HERO_INTRO =
   "Hi, I'm Filippo Pasqua.\nI'm an IB student and software developer from Italy.";
@@ -32,6 +37,9 @@ export default function PortfolioPage() {
   const [isGateOpen, setIsGateOpen] = useState(true);
   const [cvSaved, setCvSaved] = useState(false);
   const cvSavedTimerRef = useRef(0);
+  const cursorEffectsAvailable = useCursorEffectsAvailable();
+  const cursorMode = useCursorMode();
+  const showRipples = cursorEffectsAvailable && cursorMode === "ripple";
 
   useEffect(() => () => window.clearTimeout(cvSavedTimerRef.current), []);
 
@@ -126,8 +134,42 @@ export default function PortfolioPage() {
         <StyleNote ready={chromeReady} />
 
         <section id="home" className="hero-only" aria-labelledby="hero-intro">
+          <AnimatePresence>
+            {showRipples && (
+              <motion.div
+                key="ripples"
+                className="hero-ripple"
+                aria-hidden="true"
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                <Suspense fallback={null}>
+                  <RippleDistortion
+                    src="/hero-assets/ripple-paper.webp"
+                    grayscale={false}
+                    brushSize={150}
+                    strength={0.06}
+                    swirl={1.5}
+                    rings={4}
+                    spread={5}
+                    fade={2.4}
+                    spacing={15}
+                    dispersion={0.3}
+                    glint={0.1}
+                    tint="#1a55ff"
+                    tintAmount={0.6}
+                    trigger="both"
+                    quality="medium"
+                  />
+                </Suspense>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className={`hero-content${isHelloOpen ? " hello-open" : ""}`}>
             <div id="hero-intro" className="hero-intro">
+              {cursorEffectsAvailable && <CursorSwitch ready={chromeReady} />}
+
               <SwingText
                 text={HERO_INTRO}
                 className="hero-intro-copy"
