@@ -8,7 +8,7 @@ import {
   useTransform,
   useVelocity,
 } from "motion/react";
-import { useRef, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
+import { useRef, type MouseEvent as ReactMouseEvent } from "react";
 
 import "./balloon-logo.css";
 
@@ -23,25 +23,12 @@ import "./balloon-logo.css";
 const LEAN = 0.018;
 const MAX_LEAN = 24;
 
-/**
- * The balloon turns around its vertical axis. A photo has no depth, so it is
- * stacked as copies spread through the balloon's thickness, shaped like a
- * pillow: the middle copy is the full outline (the seam) and darker, the
- * faces in front and behind are a little smaller. Turned sideways it still
- * looks inflated, and from behind it shows its mirrored back like a real
- * balloon.
+/*
+ * The balloon turns around its vertical axis. There is no 3D model: Codex
+ * generated the same balloon from four angles (0, 30, 60 and 90 degrees), and
+ * the CSS steps through those views every 30 degrees, mirrored for the far
+ * half of the turn, with a small real 3D tilt in between (balloon-logo.css).
  */
-const LAYERS = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
-const OUTER = 4;
-
-function layerStyle(layer: number) {
-  const out = Math.abs(layer) / OUTER;
-  return {
-    "--layer": layer,
-    "--layer-scale": 1 - out * out * 0.07,
-    "--shade": 0.7 + 0.3 * out ** 1.5,
-  } as CSSProperties;
-}
 
 export default function BalloonLogo({ ready }: { ready: boolean }) {
   const reduceMotion = useReducedMotion();
@@ -92,19 +79,8 @@ export default function BalloonLogo({ ready }: { ready: boolean }) {
           <svg className="balloon-string" viewBox="0 0 20 64" preserveAspectRatio="none">
             <path d="M10 0 C 4 14, 16 26, 10 38 S 5 54, 11 64" />
           </svg>
-          <span className="balloon-spin">
-            {LAYERS.map((depth) => (
-              <img
-                key={depth}
-                className="balloon-art"
-                src="/hero-assets/fp-balloon.webp"
-                alt=""
-                width={520}
-                height={520}
-                draggable={false}
-                style={layerStyle(depth)}
-              />
-            ))}
+          <span className="balloon-turn">
+            <span className="balloon-frame" />
           </span>
         </motion.span>
       </motion.a>

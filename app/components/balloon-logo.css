@@ -65,38 +65,95 @@
   perspective: 700px;
 }
 
-/* Turns around the vertical axis; the layers sit through its thickness. */
-.balloon-spin {
-  /* Nine layers over about an eighth of the width: an inflated balloon. */
-  --depth: calc(var(--balloon-w) * 0.016);
+/* Turning around the vertical axis. .balloon-frame steps through the four
+   photographed angles every 30 degrees (mirrored for the far half of the
+   turn); .balloon-turn tilts each view from -15 to +15 degrees in real 3D in
+   the meantime, so the turn reads as continuous. Both run on the same clock:
+   one step of the sprite is exactly one tilt cycle. */
+.balloon-turn {
+  --turn: 12s;
   position: relative;
   display: block;
   transform-style: preserve-3d;
-  animation: balloon-spin 11s linear infinite;
+  animation: balloon-tilt calc(var(--turn) / 12) linear infinite;
 }
 
-@keyframes balloon-spin {
+.balloon-frame {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  background: url("/hero-assets/fp-balloon-turn.webp") 0 0 / 400% 100% no-repeat;
+  filter: drop-shadow(0 10px 14px rgb(10 30 110 / 0.22));
+  animation: balloon-frames var(--turn) step-end infinite;
+}
+
+@keyframes balloon-tilt {
+  from {
+    transform: rotateY(-15deg);
+  }
+
   to {
-    transform: rotateY(360deg);
+    transform: rotateY(15deg);
   }
 }
 
-.balloon-art {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: auto;
-  filter: brightness(var(--shade));
-  pointer-events: none;
-  transform: translateZ(calc(var(--layer) * var(--depth))) scale(var(--layer-scale));
-  -webkit-user-drag: none;
-}
+/* 0, 30, 60, 90, then back through the views mirrored (120 to 270), then the
+   near side again (300, 330). */
+@keyframes balloon-frames {
+  0% {
+    background-position: 0% 0;
+    transform: none;
+  }
 
-/* The middle layer (the seam) sets the box size and carries the soft shadow. */
-.balloon-art:nth-child(5) {
-  position: relative;
-  filter: drop-shadow(0 10px 14px rgb(10 30 110 / 0.22));
+  8.333% {
+    background-position: 33.333% 0;
+  }
+
+  16.667% {
+    background-position: 66.667% 0;
+  }
+
+  25% {
+    background-position: 100% 0;
+  }
+
+  33.333% {
+    background-position: 66.667% 0;
+    transform: scaleX(-1);
+  }
+
+  41.667% {
+    background-position: 33.333% 0;
+  }
+
+  50% {
+    background-position: 0% 0;
+  }
+
+  58.333% {
+    background-position: 33.333% 0;
+  }
+
+  66.667% {
+    background-position: 66.667% 0;
+  }
+
+  75% {
+    background-position: 100% 0;
+  }
+
+  83.333% {
+    background-position: 66.667% 0;
+    transform: none;
+  }
+
+  91.667% {
+    background-position: 33.333% 0;
+  }
+
+  100% {
+    background-position: 0% 0;
+  }
 }
 
 /* The string hangs from the bottom of the F. */
@@ -165,7 +222,8 @@
 
   .balloon-logo.is-ready .balloon-float,
   .balloon-string,
-  .balloon-spin {
+  .balloon-turn,
+  .balloon-frame {
     animation: none;
   }
 }
