@@ -87,6 +87,10 @@
     transform 380ms var(--radio-ease);
 }
 
+.house-radio[data-settling="true"] .radio-layer {
+  pointer-events: none;
+}
+
 .radio-layer[data-active="true"] {
   opacity: 1;
   filter: none;
@@ -1061,7 +1065,8 @@
 }
 
 .radio-station.is-broken {
-  opacity: 0.4;
+  color: var(--radio-muted);
+  cursor: not-allowed;
 }
 
 .radio-station.is-broken .radio-station-title {
@@ -1108,7 +1113,8 @@
   .house-radio {
     --radio-w: calc(100vw - 20px);
     --screen-w: calc(100vw - 44px);
-    --screen-h: max(200px, calc((100vw - 44px) * 0.5625));
+    /* Never taller than the screen can spare, never under YouTube's 200px. */
+    --screen-h: clamp(200px, calc((100vw - 44px) * 0.5625), calc(100dvh - 220px));
   }
 
   .radio-layer-live {
@@ -1170,11 +1176,20 @@
       display: none;
     }
   }
+}
 
-  /* The live and open radio fill the foot of the screen; the corner buttons
-     wait behind it rather than poking out underneath. */
+/* Where the live or open radio can reach the corners, the corner buttons
+   (and the style note) wait behind it rather than sitting on the video. */
+@media (max-width: 1279px) {
   body:has(.house-radio:not([data-view="idle"])) :is(.sound-toggle, .style-note) {
     visibility: hidden;
+  }
+}
+
+/* Short screens: no room for the station list; prev and next still tune. */
+@media (max-height: 520px) {
+  .radio-stations {
+    display: none;
   }
 }
 
@@ -1187,8 +1202,18 @@
     top 700ms var(--radio-ease, ease);
 }
 
-body:has(.house-radio[data-view="live"]) .hero-page .hero-intro {
-  top: min(50%, calc(100% - 440px));
+/* Floored so the Cursor pill above the sentence never slides under the logo. */
+body:has(.house-radio:not([data-view="idle"])) .hero-page .hero-intro {
+  top: clamp(270px, calc(100% - 440px), 50%);
+}
+
+/* The Introduction board lifts too, as far as the page allows. */
+.hero-page .hello-board-anchor {
+  transition: top 700ms var(--radio-ease, ease);
+}
+
+body:has(.house-radio:not([data-view="idle"])) .hero-page .hello-open .hello-board-anchor {
+  top: clamp(300px, calc(100% - 516px), 50%);
 }
 
 @media (max-width: 920px) {
@@ -1196,23 +1221,30 @@ body:has(.house-radio[data-view="live"]) .hero-page .hero-intro {
     transition: padding-bottom 700ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  body:has(.house-radio[data-view="live"]) .hero-page .hero-content {
+  /* Room for the small radio itself. */
+  body:has(.house-radio) .hero-page .hero-content {
+    padding-bottom: calc(146px + env(safe-area-inset-bottom, 0px));
+  }
+
+  body:has(.house-radio:not([data-view="idle"])) .hero-page .hero-content {
     padding-bottom: 272px;
   }
 
-  /* Here the sentence is in the flow; the padding above does the lifting. */
-  body:has(.house-radio[data-view="live"]) .hero-page .hero-intro {
+  /* Here the sentence and board are in the flow; the padding does the lifting. */
+  body:has(.house-radio:not([data-view="idle"])) .hero-page .hero-intro,
+  body:has(.house-radio:not([data-view="idle"])) .hero-page .hello-open .hello-board-anchor {
     top: auto;
   }
 }
 
 @media (max-width: 640px) {
-  body:has(.house-radio[data-view="live"]) .hero-page .hero-content {
+  body:has(.house-radio:not([data-view="idle"])) .hero-page .hero-content {
     padding-bottom: calc(max(200px, (100vw - 44px) * 0.5625) + 130px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .house-radio,
   .radio-layer,
   .radio-antenna,
   .radio-knob,

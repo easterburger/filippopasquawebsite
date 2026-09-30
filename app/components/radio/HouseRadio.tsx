@@ -13,7 +13,7 @@ import {
   SpeakerSlash,
   Stop,
 } from "@phosphor-icons/react";
-import { motion, type Transition } from "motion/react";
+import { motion, useReducedMotion, type Transition } from "motion/react";
 import {
   useEffect,
   useLayoutEffect,
@@ -24,6 +24,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 
+import { MENU_COVER_EVENT } from "../BubbleMenu";
 import { setCursorExclusion } from "../cursor-exclusion";
 import { BEFORE_NAVIGATE_EVENT } from "../PageTransition";
 import { DEFAULT_STATION, DIAL_MAX, DIAL_MIN, STATIONS } from "./stations";
@@ -90,14 +91,15 @@ const DIAL_TICKS = Array.from(
   (_, i) => DIAL_MIN + i / 2,
 );
 
-function nearestStation(frequency: number) {
-  let best = 0;
+function nearestStation(frequency: number, skip: ReadonlySet<number> = new Set()) {
+  let best = -1;
   STATIONS.forEach((station, i) => {
-    if (Math.abs(station.frequency - frequency) < Math.abs(STATIONS[best].frequency - frequency)) {
+    if (skip.has(i)) return;
+    if (best < 0 || Math.abs(station.frequency - frequency) < Math.abs(STATIONS[best].frequency - frequency)) {
       best = i;
     }
   });
-  return best;
+  return Math.max(best, 0);
 }
 
 function formatTime(seconds: number) {
@@ -140,6 +142,10 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
   const [broken, setBroken] = useState<ReadonlySet<number>>(new Set());
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [announcement, setAnnouncement] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [settling, setSettling] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const islandTransition: Transition = reduceMotion ? { duration: 0 } : ISLAND_SPRING;
 
   const rootRef = useRef<HTMLDivElement>(null);
   const idleRef = useRef<HTMLDivElement>(null);
@@ -171,16 +177,20 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
   /** Whether the video is out and on screen, so YouTube lets it play. */
   const visibleRef = useRef(false);
   const closingRef = useRef(false);
+  /** Paused because the video can't be seen (hidden tab, the menu over it, off screen). */
   const hiddenPauseRef = useRef(false);
+  const coveredRef = useRef(false);
+  const brokenRef = useRef<Set<number>>(new Set());
   const focusAfterRef = useRef<"face" | "live" | "open" | null>(null);
   const failuresRef = useRef(0);
-  const timersRef = useRef({ start: 0, tune: 0, fade: 0, watchdog: 0 });
+  const timersRef = useRef({ start: 0, tune: 0, fade: 0, watchdog: 0, settle: 0 });
   const dragStationRef = useRef<number | null>(null);
 
   const station = STATIONS[index];
   const shownFrequency = dragFrequency ?? station.frequency;
   // While the needle is dragged, the display previews where it'll land.
-  const shownStation = dragFrequency === null ? station : STATIONS[nearestStation(dragFrequency)];
+  const shownStation =
+    dragFrequency === null ? station : STATIONS[nearestStation(dragFrequency, broken)];
   const isPlaying = status === "playing";
   const showsPause = status === "playing" || status === "tuning";
   const progress = time.duration > 0 ? Math.min(1, time.current / time.duration) : 0;
@@ -284,63 +294,100 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
       if (now - started < 1100) raf = requestAnimationFrame(follow);
     };
     raf = requestAnimationFrame(follow);
+    // Anything else that could move it: the window, the page, its own entrance.
+    const pageObserver = new ResizeObserver(publish);
+    pageObserver.observe(document.documentElement);
+    const root = rootRef.current;
     window.addEventListener("resize", publish);
+    root?.addEventListener("transitionend", publish);
     return () => {
       cancelAnimationFrame(raf);
+      pageObserver.disconnect();
       window.removeEventListener("resize", publish);
+      root?.removeEventListener("transitionend", publish);
     };
   }, [view, metrics]);
 
-  // Open: Escape or a press outside folds it down to the live player.
+  // Open: Escape or a click outside folds it down to the live player. (On
+  // click, not press, so the page settling around it can't make that click
+  // miss what it was aimed at.)
   useEffect(() => {
     if (view !== "open") return;
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
-      if (event.key !== "Escape" || !rootRef.current?.contains(document.activeElement)) return;
+      if (event.key !== "Escape" || coveredRef.current) return;
       event.preventDefault();
       collapse();
     };
-    const onPointerDown = (event: PointerEvent) => {
+    const onClick = (event: MouseEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) collapse();
     };
     document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("click", onClick, true);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("click", onClick, true);
     };
     // collapse() works through refs and state setters, so any render's copy will do.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view]);
 
-  // YouTube's player may only play where it can be seen: pause with a hidden
-  // tab and pick up again on return; stop before a page transition covers it.
+  // YouTube's player may only play where it can be seen. Whenever it can't
+  // (a hidden tab, the menu over it, squeezed off screen) the music pauses,
+  // and it picks up again once the video is back in view. Before a page
+  // transition covers it, it stops.
   useEffect(() => {
-    const onVisibility = () => {
+    let raf = 0;
+    const recheck = () => {
+      raf = 0;
       const player = playerRef.current;
-      if (!player || !playerReadyRef.current) return;
-      if (document.hidden) {
-        if (player.getPlayerState() === PLAYER_STATE.PLAYING) {
+      if (!player || !playerReadyRef.current || !wantPlayRef.current || viewRef.current === "idle") return;
+      if (!screenIsSeen()) {
+        if (!hiddenPauseRef.current) {
           hiddenPauseRef.current = true;
           player.pauseVideo();
         }
       } else if (hiddenPauseRef.current) {
         hiddenPauseRef.current = false;
-        if (wantPlayRef.current && viewRef.current !== "idle") playSelected();
+        playSelected();
       }
     };
+    // Frames don't run in a hidden tab, so visibility is checked at once.
+    const schedule = () => {
+      if (!raf) raf = requestAnimationFrame(recheck);
+    };
+    const onMenu = (event: Event) => {
+      const open = Boolean((event as CustomEvent<{ open?: boolean }>).detail?.open);
+      coveredRef.current = open;
+      setMenuOpen(open);
+      recheck();
+    };
     const onLeave = () => {
+      const fading = timersRef.current.fade !== 0;
       wantPlayRef.current = false;
       visibleRef.current = false;
       clearTimers();
-      playerRef.current?.pauseVideo();
+      const player = playerRef.current;
+      if (player && playerReadyRef.current) {
+        player.pauseVideo();
+        if (fading) player.setVolume(volumeRef.current);
+      }
+      closingRef.current = false;
+      hiddenPauseRef.current = false;
     };
-    document.addEventListener("visibilitychange", onVisibility);
+    document.addEventListener("visibilitychange", recheck);
+    window.addEventListener("resize", schedule);
+    window.addEventListener("orientationchange", schedule);
+    window.addEventListener(MENU_COVER_EVENT, onMenu);
     window.addEventListener(BEFORE_NAVIGATE_EVENT, onLeave);
     return () => {
-      document.removeEventListener("visibilitychange", onVisibility);
+      cancelAnimationFrame(raf);
+      document.removeEventListener("visibilitychange", recheck);
+      window.removeEventListener("resize", schedule);
+      window.removeEventListener("orientationchange", schedule);
+      window.removeEventListener(MENU_COVER_EVENT, onMenu);
       window.removeEventListener(BEFORE_NAVIGATE_EVENT, onLeave);
     };
-    // playSelected() works through refs, so the first render's copy will do.
+    // These helpers work through refs, so the first render's copies will do.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -350,6 +397,11 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
   function go(next: View) {
     viewRef.current = next;
     setView(next);
+    // The new face ignores the mouse for a moment, so the second click of a
+    // double-click can't land on whatever just appeared under it.
+    setSettling(true);
+    window.clearTimeout(timersRef.current.settle);
+    timersRef.current.settle = window.setTimeout(() => setSettling(false), 320);
   }
 
   function clearTimers() {
@@ -360,10 +412,10 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
     timers.fade = 0;
   }
 
-  /** At least half the video on screen, in a visible tab. */
+  /** At least half the video on screen, uncovered, in a visible tab. */
   function screenIsSeen() {
     const frame = frameRef.current;
-    if (!frame || document.hidden) return false;
+    if (!frame || document.hidden || coveredRef.current) return false;
     const rect = frame.getBoundingClientRect();
     const seenW = Math.min(rect.right, window.innerWidth) - Math.max(rect.left, 0);
     const seenH = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
@@ -386,7 +438,14 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
   /** Play the selected station, loading it first if the player holds another. */
   function playSelected() {
     const player = playerRef.current;
-    if (!player || !canPlayNow()) return;
+    if (!player) return;
+    if (!canPlayNow()) {
+      // Wanted but out of sight: remember to start once it's seen.
+      if (wantPlayRef.current && visibleRef.current && playerReadyRef.current) {
+        hiddenPauseRef.current = true;
+      }
+      return;
+    }
     applyPlayerVolume(player);
     if (loadedIndexRef.current !== indexRef.current) {
       loadedIndexRef.current = indexRef.current;
@@ -401,7 +460,9 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
   }
 
   function markBroken(failed: number) {
-    setBroken((previous) => new Set(previous).add(failed));
+    if (brokenRef.current.has(failed)) return;
+    brokenRef.current.add(failed);
+    setBroken(new Set(brokenRef.current));
     failuresRef.current += 1;
     if (failuresRef.current >= STATIONS.length) {
       setStatus("unavailable");
@@ -467,7 +528,8 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
             onStateChange: ({ target, data }) => {
               if (data === PLAYER_STATE.PLAYING) {
                 // Never play where it can't be seen (YouTube's rule).
-                if (!visibleRef.current || document.hidden) {
+                if (!visibleRef.current || !screenIsSeen()) {
+                  if (visibleRef.current && wantPlayRef.current) hiddenPauseRef.current = true;
                   target.pauseVideo();
                   return;
                 }
@@ -486,8 +548,10 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
                   setStatus(viewRef.current === "idle" ? "off" : "paused");
                 }
               } else if (data === PLAYER_STATE.ENDED) {
-                // On to the next record, like the station would.
-                if (!closingRef.current) tune(indexRef.current + 1, { quiet: true, settle: 0 });
+                // On to the next record, like the station would (unless a
+                // new station is already on its way).
+                if (closingRef.current || loadedIndexRef.current !== indexRef.current) return;
+                tune(loadedIndexRef.current + 1, { quiet: true, settle: 0 });
               }
             },
             onError: () => markBroken(loadedIndexRef.current),
@@ -544,7 +608,7 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
   /** Fold the open radio down to the live player; the music keeps going. */
   function collapse() {
     if (viewRef.current !== "open") return;
-    if (!playerRef.current) {
+    if (!playerRef.current && !creatingRef.current) {
       stop();
       return;
     }
@@ -599,8 +663,12 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
     }, FADE_OUT_MS / steps);
   }
 
-  function tune(target: number, { quiet = false, settle = TUNE_SETTLE_MS } = {}) {
-    const next = (target + STATIONS.length) % STATIONS.length;
+  function tune(target: number, { quiet = false, settle = TUNE_SETTLE_MS, step = 1 } = {}) {
+    // Skip stations that turned out not to play.
+    let next = (target + STATIONS.length) % STATIONS.length;
+    for (let tries = 0; brokenRef.current.has(next) && tries < STATIONS.length; tries++) {
+      next = (next + step + STATIONS.length) % STATIONS.length;
+    }
     if (!quiet) playStatic(volumeRef.current);
     indexRef.current = next;
     setIndex(next);
@@ -623,13 +691,26 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
   }
 
   const togglePlay = () => {
+    // After YouTube failed to load, Play tries again.
+    if (!playerRef.current && !creatingRef.current) {
+      failuresRef.current = 0;
+      wantPlayRef.current = true;
+      visibleRef.current = true;
+      setStatus("tuning");
+      ensurePlayer();
+      return;
+    }
     const pausing = status === "playing" || status === "tuning";
     wantPlayRef.current = !pausing;
     setStatus(pausing ? "paused" : "tuning");
     const player = playerRef.current;
     if (!player || !playerReadyRef.current) return;
-    if (pausing) player.pauseVideo();
-    else playSelected();
+    if (pausing) {
+      hiddenPauseRef.current = false;
+      player.pauseVideo();
+    } else {
+      playSelected();
+    }
   };
 
   const applyVolume = (next: number) => {
@@ -659,7 +740,7 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
   const onDialDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     event.currentTarget.setPointerCapture(event.pointerId);
     const frequency = frequencyAt(event);
-    dragStationRef.current = nearestStation(frequency);
+    dragStationRef.current = nearestStation(frequency, brokenRef.current);
     setDragFrequency(frequency);
   };
 
@@ -667,7 +748,7 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
     if (dragFrequency === null) return;
     const frequency = frequencyAt(event);
     setDragFrequency(frequency);
-    const nearest = nearestStation(frequency);
+    const nearest = nearestStation(frequency, brokenRef.current);
     if (nearest !== dragStationRef.current) {
       // Crackle as the needle crosses each station.
       dragStationRef.current = nearest;
@@ -677,7 +758,7 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
 
   const onDialUp = () => {
     if (dragFrequency === null) return;
-    const target = dragStationRef.current ?? nearestStation(dragFrequency);
+    const target = dragStationRef.current ?? nearestStation(dragFrequency, brokenRef.current);
     setDragFrequency(null);
     dragStationRef.current = null;
     if (target !== indexRef.current) tune(target);
@@ -693,8 +774,12 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
     else if (event.key === "End") target = STATIONS.length - 1;
     if (target === null) return;
     event.preventDefault();
+    const step = event.key === "ArrowUp" || event.key === "ArrowLeft" || event.key === "End" ? -1 : 1;
+    while (brokenRef.current.has(target) && brokenRef.current.size < STATIONS.length) {
+      target = (target + step + STATIONS.length) % STATIONS.length;
+    }
     if (target === index) return;
-    tune(target);
+    tune(target, { step });
     const row = stationRefs.current[target];
     row?.focus({ preventScroll: true });
     row?.scrollIntoView({ block: "nearest" });
@@ -709,7 +794,14 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
       className={`house-radio${ready ? " is-ready" : ""}${volumeFixed ? " is-volume-fixed" : ""}`}
       data-view={view}
       data-status={status}
-      inert={!ready}
+      data-settling={settling}
+      inert={!ready || menuOpen}
+      onBlur={(event) => {
+        // Tabbing out of the open radio folds it, so focus never sits on
+        // the page it covers.
+        const next = event.relatedTarget as Node | null;
+        if (viewRef.current === "open" && next && !rootRef.current?.contains(next)) collapse();
+      }}
       style={{ "--radio-needle": `${dialPosition(shownFrequency)}%` } as CSSProperties}
     >
       <span className="radio-antenna" aria-hidden="true" />
@@ -722,7 +814,7 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
             ? { width: metrics[view].w, height: metrics[view].h, borderRadius: RADIUS[view] }
             : { borderRadius: RADIUS[view] }
         }
-        transition={ISLAND_SPRING}
+        transition={islandTransition}
       >
         {/* Idle: a small radio. */}
         <div
@@ -936,7 +1028,7 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
                 type="button"
                 className="radio-button"
                 aria-label="Previous station"
-                onClick={() => tune(index - 1)}
+                onClick={() => tune(index - 1, { step: -1 })}
               >
                 <SkipBack weight="fill" />
               </button>
@@ -1010,8 +1102,10 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
                     aria-checked={current}
                     tabIndex={current ? 0 : -1}
                     className={`radio-station${current ? " is-current" : ""}${broken.has(i) ? " is-broken" : ""}`}
+                    aria-disabled={broken.has(i) || undefined}
+                    aria-label={broken.has(i) ? `${item.title}, ${item.artist}, unavailable` : undefined}
                     onClick={() => {
-                      if (!current) tune(i);
+                      if (!current && !broken.has(i)) tune(i);
                     }}
                   >
                     <span className="radio-station-freq">{item.frequency.toFixed(1)}</span>
@@ -1034,7 +1128,7 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
           className="radio-screen-frame"
           initial={false}
           animate={{ x: screenPos.x, y: screenPos.y, opacity: view === "idle" ? 0 : 1 }}
-          transition={ISLAND_SPRING}
+          transition={islandTransition}
         >
           <div ref={screenRef} className="radio-screen" />
           {status === "unavailable" && (

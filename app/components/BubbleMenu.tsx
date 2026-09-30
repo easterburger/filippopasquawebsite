@@ -6,6 +6,9 @@ import { gsap } from "gsap";
 import { usePageTransition } from "./PageTransition";
 import "./BubbleMenu.css";
 
+/** Fired on window with `detail.open` whenever the menu opens or closes. */
+export const MENU_COVER_EVENT = "fp:menu-cover";
+
 export type BubbleMenuItem = {
   label: string;
   href: string;
@@ -133,6 +136,11 @@ export default function BubbleMenu({
     setIsMenuOpen(true);
     onMenuClick?.(true);
   }, [onMenuClick, openRequest]);
+
+  // Tell anything the open menu covers (the home radio's video) about it.
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent(MENU_COVER_EVENT, { detail: { open: isMenuOpen } }));
+  }, [isMenuOpen]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
