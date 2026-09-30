@@ -1,11 +1,12 @@
 "use client";
 
-import { ArrowUpRight, Sparkle, X } from "@phosphor-icons/react";
+import { ArrowDown, ArrowUpRight, Check, Sparkle, X } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import TextFlippingBoardDemo from "@/components/text-flipping-board-demo";
 
+import BalloonLogo from "./BalloonLogo";
 import BubbleMenu from "./BubbleMenu";
 import IntroGate from "./IntroGate";
 import { INTRO_GATE_KEY } from "./intro-seen";
@@ -29,6 +30,17 @@ export default function PortfolioPage() {
   const [chromeReady, setChromeReady] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
   const [isGateOpen, setIsGateOpen] = useState(true);
+  const [cvSaved, setCvSaved] = useState(false);
+  const cvSavedTimerRef = useRef(0);
+
+  useEffect(() => () => window.clearTimeout(cvSavedTimerRef.current), []);
+
+  // The download itself is the browser's; the button just shows it happened.
+  const handleCvDownload = () => {
+    setCvSaved(true);
+    window.clearTimeout(cvSavedTimerRef.current);
+    cvSavedTimerRef.current = window.setTimeout(() => setCvSaved(false), 2600);
+  };
 
   useIsomorphicLayoutEffect(() => {
     try {
@@ -83,16 +95,33 @@ export default function PortfolioPage() {
           entranceReady={chromeReady}
         >
           <a
-            className={`cv-download-button${chromeReady ? " is-ready" : ""}`}
+            className={`cv-download-button${chromeReady ? " is-ready" : ""}${
+              cvSaved ? " is-saved" : ""
+            }`}
             href="/Filippo-Pasqua-CV.pdf"
             download="Filippo-Pasqua-CV.pdf"
             aria-label="Download Filippo Pasqua CV"
+            onClick={handleCvDownload}
           >
-            <span className="cv-download-label" data-label="Download CV">
+            {/* A little CV page that peeks out of the button, then drops in. */}
+            <span className="cv-sheet" aria-hidden="true">
+              <span className="cv-sheet-title">CV</span>
+              <span className="cv-sheet-line" />
+              <span className="cv-sheet-line" />
+              <span className="cv-sheet-line is-short" />
+            </span>
+            <span className="cv-download-text" aria-hidden="true">
               <span className="cv-download-default">Download CV</span>
+              <span className="cv-download-done">Saved</span>
+            </span>
+            <span className="cv-download-chip" aria-hidden="true">
+              <ArrowDown weight="bold" className="cv-download-arrow" />
+              <Check weight="bold" className="cv-download-check" />
             </span>
           </a>
         </BubbleMenu>
+
+        <BalloonLogo ready={chromeReady} />
 
         <StyleNote ready={chromeReady} />
 

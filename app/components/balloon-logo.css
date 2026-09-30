@@ -1,0 +1,143 @@
+/* The FP balloon in the top-left corner: it bobs on its string, and bounces
+   when pointed at. */
+
+.balloon-logo {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top, 0px));
+  left: max(20px, env(safe-area-inset-left, 0px));
+  z-index: 60;
+  display: block;
+  width: 84px;
+  opacity: 0;
+  transform: translateY(24px) scale(0.6);
+  transition:
+    opacity 500ms ease,
+    transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.balloon-logo.is-ready {
+  opacity: 1;
+  transform: none;
+}
+
+.balloon-logo:focus-visible {
+  outline: 2px solid #1a55ff;
+  outline-offset: 6px;
+  border-radius: 12px;
+}
+
+.balloon-float {
+  position: relative;
+  display: block;
+  transform-origin: 20% 100%;
+  animation: balloon-bob 4.2s ease-in-out infinite;
+}
+
+.balloon-art {
+  position: relative;
+  z-index: 1;
+  display: block;
+  transform-origin: 50% 80%;
+}
+
+.balloon-art svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* The string hangs from the bottom of the F. */
+.balloon-string {
+  position: absolute;
+  top: 88%;
+  left: 13%;
+  width: 10px;
+  height: 34px;
+  overflow: visible;
+  fill: none;
+  stroke: rgb(24 27 32 / 0.45);
+  stroke-linecap: round;
+  stroke-width: 1.2px;
+  transform-origin: 50% 0;
+  animation: balloon-string 4.2s ease-in-out infinite;
+}
+
+.balloon-string path {
+  vector-effect: non-scaling-stroke;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .balloon-logo:hover .balloon-art {
+    animation: balloon-boing 700ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+
+.balloon-logo:active .balloon-art {
+  transform: scale(0.94, 0.9);
+}
+
+@keyframes balloon-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+
+  50% {
+    transform: translateY(-7px) rotate(2.5deg);
+  }
+}
+
+@keyframes balloon-string {
+  0%,
+  100% {
+    transform: rotate(4deg);
+  }
+
+  50% {
+    transform: rotate(-5deg);
+  }
+}
+
+@keyframes balloon-boing {
+  0% {
+    transform: none;
+  }
+
+  30% {
+    transform: scale(1.12, 0.9);
+  }
+
+  55% {
+    transform: scale(0.94, 1.08);
+  }
+
+  80% {
+    transform: scale(1.03, 0.98);
+  }
+
+  100% {
+    transform: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .balloon-logo {
+    top: max(12px, calc(env(safe-area-inset-top, 0px) + 6px));
+    left: max(16px, env(safe-area-inset-left, 0px));
+    width: 64px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .balloon-logo {
+    transition: opacity 200ms ease;
+  }
+
+  .balloon-float,
+  .balloon-string,
+  .balloon-logo:hover .balloon-art {
+    animation: none;
+  }
+}

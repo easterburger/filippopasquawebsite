@@ -1,0 +1,44 @@
+// The FP balloon: Filippo's initials as puffy foil-balloon letters in electric
+// blue. The letters are one centre line stroked very thick with round caps and
+// joins, then shaded in layers (shadow, body, inner volume, gloss, rim). The
+// home page draws this markup inline, and scripts/build-favicons.mjs turns
+// the same art into public/favicon.svg, favicon.ico and apple-touch-icon.png.
+
+/** Centre lines of "F" and "P" in the 244x190 art box. */
+export const BALLOON_LETTERS =
+  "M58 48 V152 M58 48 H108 M58 100 H98 M154 152 V48 H180 C206 48 218 64 218 80 C218 96 206 112 180 112 H154";
+
+export const BALLOON_VIEWBOX = "16 8 244 190";
+
+/** Standalone SVG markup (also parsed by scripts/build-favicons.mjs). */
+export function balloonSvg({ size }: { size?: number } = {}) {
+  const dimensions = size ? ` width="${size}" height="${size * (190 / 244)}"` : "";
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${BALLOON_VIEWBOX}"${dimensions}>
+  <defs>
+    <linearGradient id="b-base" x1="0" y1="26" x2="0" y2="174" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4a86ff"/>
+      <stop offset=".5" stop-color="#1a55ff"/>
+      <stop offset="1" stop-color="#0a2ac0"/>
+    </linearGradient>
+    <linearGradient id="b-core" x1="0" y1="34" x2="0" y2="166" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#86b4ff"/>
+      <stop offset=".45" stop-color="#2d69ff"/>
+      <stop offset="1" stop-color="#1340e0"/>
+    </linearGradient>
+    <filter id="b-soft" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2.2"/></filter>
+    <filter id="b-shadow" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>
+  </defs>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="${BALLOON_LETTERS}" stroke="#0a1f6b" stroke-width="42" opacity=".26" transform="translate(4 10)" filter="url(#b-shadow)"/>
+    <path d="${BALLOON_LETTERS}" stroke="url(#b-base)" stroke-width="42"/>
+    <path d="${BALLOON_LETTERS}" stroke="url(#b-core)" stroke-width="28" opacity=".85"/>
+    <path d="${BALLOON_LETTERS}" stroke="#bcd4ff" stroke-width="5" opacity=".4" transform="translate(6 9)" filter="url(#b-soft)"/>
+    <path d="${BALLOON_LETTERS}" stroke="#ffffff" stroke-width="8" opacity=".6" transform="translate(-6 -8)" filter="url(#b-soft)"/>
+  </g>
+  <g fill="#ffffff">
+    <ellipse cx="50" cy="40" rx="7" ry="3.6" transform="rotate(-35 50 40)" opacity=".95"/>
+    <ellipse cx="146" cy="40" rx="7" ry="3.6" transform="rotate(-35 146 40)" opacity=".95"/>
+    <ellipse cx="202" cy="62" rx="4.5" ry="2.4" transform="rotate(40 202 62)" opacity=".7"/>
+  </g>
+</svg>`;
+}

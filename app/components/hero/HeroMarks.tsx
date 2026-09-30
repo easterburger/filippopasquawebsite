@@ -1,8 +1,9 @@
 "use client";
 
-import { HandWaving, MapPin, SealCheck, Smiley } from "@phosphor-icons/react";
+import { HandWaving, MapPin, SealCheck } from "@phosphor-icons/react";
 import {
   useEffect,
+  useId,
   useRef,
   useState,
   useSyncExternalStore,
@@ -76,6 +77,60 @@ function usePeek() {
   return { ref, open, handlers };
 }
 
+/**
+ * A default account picture made solid: a light-blue head and shoulders,
+ * shaded like a soft 3D figure. The head and torso turn by different amounts,
+ * so the little bust reads as an object slowly turning on a stand.
+ */
+function AvatarBust() {
+  const id = useId().replace(/:/g, "");
+  const url = (name: string) => `url(#${id}-${name})`;
+  return (
+    <svg className="hero-bust" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id={`${id}-bg`} cx="50%" cy="30%" r="75%">
+          <stop offset="0" stopColor="#f5faff" />
+          <stop offset="1" stopColor="#cfe5ff" />
+        </radialGradient>
+        <radialGradient id={`${id}-skin`} cx="36%" cy="28%" r="78%">
+          <stop offset="0" stopColor="#f2f9ff" />
+          <stop offset="0.28" stopColor="#b3dbff" />
+          <stop offset="0.7" stopColor="#6cb2f5" />
+          <stop offset="1" stopColor="#3f86d9" />
+        </radialGradient>
+        <radialGradient id={`${id}-body`} cx="38%" cy="12%" r="95%">
+          <stop offset="0" stopColor="#e9f5ff" />
+          <stop offset="0.3" stopColor="#a6d3ff" />
+          <stop offset="0.72" stopColor="#5fa7f0" />
+          <stop offset="1" stopColor="#3a7fd2" />
+        </radialGradient>
+        <clipPath id={`${id}-clip`}>
+          <circle cx="50" cy="50" r="50" />
+        </clipPath>
+        <filter id={`${id}-soft`} x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="2.4" />
+        </filter>
+        <filter id={`${id}-glint`} x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="0.8" />
+        </filter>
+      </defs>
+      <g clipPath={url("clip")}>
+        <circle cx="50" cy="50" r="50" fill={url("bg")} />
+        <g className="hero-bust-body">
+          <path d="M14 108 C 14 80, 30 66, 50 66 C 70 66, 86 80, 86 108 Z" fill={url("body")} />
+          <ellipse cx="38" cy="78" rx="9" ry="3.2" fill="#ffffff" opacity="0.5" filter={url("glint")} transform="rotate(-18 38 78)" />
+        </g>
+        <ellipse className="hero-bust-shadow" cx="50" cy="66" rx="15" ry="4.5" fill="#2e6cb8" opacity="0.35" filter={url("soft")} />
+        <g className="hero-bust-head">
+          <circle cx="50" cy="40" r="19" fill={url("skin")} />
+          <ellipse cx="43" cy="31" rx="6" ry="3.4" fill="#ffffff" opacity="0.75" filter={url("glint")} transform="rotate(-28 43 31)" />
+        </g>
+      </g>
+      <circle cx="50" cy="50" r="48.8" fill="none" stroke="#ffffff" strokeOpacity="0.8" strokeWidth="2.4" />
+    </svg>
+  );
+}
+
 /** "Hi," with a hand that waves when the headline lands and on hover. */
 function WavingHi({ children }: { children: ReactNode }) {
   const [round, setRound] = useState(0);
@@ -99,11 +154,8 @@ function AccountBadge({ children }: { children: ReactNode }) {
   return (
     <span ref={ref} className={`hero-mark hero-badge${open ? " is-open" : ""}`} {...handlers}>
       <span className="hero-badge-pill" aria-hidden="true" />
-      {/* A smiley in the avatar spot, turning like a coin. */}
       <span className="hero-badge-avatar" aria-hidden="true">
-        <span className="hero-badge-face">
-          <Smiley weight="fill" />
-        </span>
+        <AvatarBust />
       </span>
       {children}
       <span className="hero-badge-check" aria-hidden="true">

@@ -122,27 +122,43 @@
   transform: translateY(-44%) scale(0.6);
 }
 
-/* The face spins about its vertical axis, like a coin on a table. */
-.hero-badge-face {
+.hero-bust {
   display: block;
   width: 100%;
   height: 100%;
-  color: #f2b33d;
-  filter: drop-shadow(0 0.025em 0 #c98a1a);
-  animation: hero-face-spin 3.6s linear infinite;
+  overflow: visible;
+  filter: drop-shadow(0 0.02em 0.04em rgb(30 90 170 / 0.3));
 }
 
-/* The icon's circle sits inside some padding; scale it to fill the slot. */
-.hero-badge-face svg {
-  display: block;
-  width: 124%;
-  height: 124%;
-  margin: -12%;
+/* Turning on a stand: the head swings further than the shoulders, which
+   gives the flat drawing its depth. */
+.hero-bust-head,
+.hero-bust-body,
+.hero-bust-shadow {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  animation: hero-bust-turn 5.5s ease-in-out infinite alternate;
 }
 
-@keyframes hero-face-spin {
+.hero-bust-head {
+  --swing: 7px;
+}
+
+.hero-bust-shadow {
+  --swing: 4px;
+}
+
+.hero-bust-body {
+  --swing: 2.5px;
+}
+
+@keyframes hero-bust-turn {
+  from {
+    transform: translateX(calc(var(--swing) * -1)) scaleX(0.97);
+  }
+
   to {
-    transform: rotateY(360deg);
+    transform: translateX(var(--swing)) scaleX(0.97);
   }
 }
 
@@ -656,7 +672,9 @@
     animation: none !important;
   }
 
-  .hero-badge-face {
+  .hero-bust-head,
+  .hero-bust-body,
+  .hero-bust-shadow {
     animation: none;
   }
 
