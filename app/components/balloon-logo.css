@@ -1,24 +1,54 @@
-/* The FP balloon in the top-left corner: it bobs on its string, and bounces
-   when pointed at. */
+/* The FP balloon in the top-left corner: it bobs on its string, can be
+   dragged anywhere on screen, and bounces when pointed at. */
+
+/* What the balloon may be dragged within: the viewport, less a margin. */
+.balloon-bounds {
+  position: fixed;
+  inset: 8px;
+  z-index: -1;
+  pointer-events: none;
+}
 
 .balloon-logo {
   position: fixed;
-  top: max(14px, env(safe-area-inset-top, 0px));
-  left: max(20px, env(safe-area-inset-left, 0px));
+  top: max(10px, env(safe-area-inset-top, 0px));
+  left: max(18px, env(safe-area-inset-left, 0px));
   z-index: 60;
   display: block;
-  width: 84px;
+  width: clamp(140px, 13vw, 200px);
+  cursor: grab;
   opacity: 0;
-  transform: translateY(24px) scale(0.6);
-  transition:
-    opacity 500ms ease,
-    transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: opacity 500ms ease;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
 .balloon-logo.is-ready {
   opacity: 1;
-  transform: none;
+}
+
+/* Rises into place once, separately from the drag transform. */
+.balloon-logo.is-ready .balloon-float {
+  animation:
+    balloon-rise 900ms cubic-bezier(0.34, 1.56, 0.64, 1) both,
+    balloon-bob 4.2s ease-in-out 900ms infinite;
+}
+
+@keyframes balloon-rise {
+  from {
+    opacity: 0;
+    translate: 0 30px;
+    scale: 0.6;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
 }
 
 .balloon-logo:focus-visible {
@@ -30,29 +60,26 @@
 .balloon-float {
   position: relative;
   display: block;
-  transform-origin: 20% 100%;
-  animation: balloon-bob 4.2s ease-in-out infinite;
+  transform-origin: 30% 100%;
 }
 
 .balloon-art {
   position: relative;
   z-index: 1;
   display: block;
-  transform-origin: 50% 80%;
-}
-
-.balloon-art svg {
-  display: block;
   width: 100%;
   height: auto;
-  overflow: visible;
+  transform-origin: 50% 80%;
+  filter: drop-shadow(0 10px 14px rgb(10 30 110 / 0.22));
+  pointer-events: none;
+  -webkit-user-drag: none;
 }
 
 /* The string hangs from the bottom of the F. */
 .balloon-string {
   position: absolute;
-  top: 88%;
-  left: 13%;
+  top: 74%;
+  left: 17%;
   width: 10px;
   height: 34px;
   overflow: visible;
@@ -78,14 +105,16 @@
   transform: scale(0.94, 0.9);
 }
 
+/* Uses the individual translate property, so it never fights the lean
+   (which motion sets through transform). */
 @keyframes balloon-bob {
   0%,
   100% {
-    transform: translateY(0) rotate(-2deg);
+    translate: 0 0;
   }
 
   50% {
-    transform: translateY(-7px) rotate(2.5deg);
+    translate: 0 -7px;
   }
 }
 
@@ -124,18 +153,15 @@
 
 @media (max-width: 620px) {
   .balloon-logo {
-    top: max(12px, calc(env(safe-area-inset-top, 0px) + 6px));
-    left: max(16px, env(safe-area-inset-left, 0px));
-    width: 64px;
+    top: max(10px, calc(env(safe-area-inset-top, 0px) + 4px));
+    left: max(14px, env(safe-area-inset-left, 0px));
+    width: 108px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .balloon-logo {
-    transition: opacity 200ms ease;
-  }
 
-  .balloon-float,
+  .balloon-logo.is-ready .balloon-float,
   .balloon-string,
   .balloon-logo:hover .balloon-art {
     animation: none;

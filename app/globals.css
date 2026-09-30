@@ -76,22 +76,26 @@ img {
   background: var(--paper);
 }
 
-/* Download CV: an ink pill with an electric-blue chip. Pointing at it prints
-   a little CV page out of the bottom of the pill and bounces the arrow;
-   clicking takes the page back in and the chip turns into a green tick. */
+/* Download CV: a cream pill like the menu button beside it, with the site's
+   CTA shape (label plus a round chip). Pointing at it floods the pill in the
+   chip's electric blue from the chip outwards, bounces the arrow and prints a
+   little CV page out of the bottom; clicking tucks the page back and the chip
+   turns into a green tick. */
 .cv-download-button {
   --cv-chip: calc(var(--bubble-size, 48px) - 12px);
+  --cv-inset: 6px;
+  --cv-blue: #1a55ff;
   position: relative;
   isolation: isolate;
   box-sizing: border-box;
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   height: var(--bubble-size, 48px);
-  padding: 0 6px 0 20px;
+  padding: 0 var(--cv-inset) 0 22px;
   border-radius: 999px;
-  color: #f5f1e4;
+  color: var(--ink);
   line-height: 1;
   text-decoration: none;
   white-space: nowrap;
@@ -100,21 +104,36 @@ img {
   transform: translateY(-12px);
   filter: blur(10px);
   transition:
+    color 320ms cubic-bezier(0.22, 1, 0.36, 1),
     opacity 520ms cubic-bezier(0.16, 1, 0.3, 1),
     transform 520ms cubic-bezier(0.16, 1, 0.3, 1),
     filter 520ms cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
 }
 
-/* The pill face is its own layer so the CV page can sit behind it. */
-.cv-download-button::before {
+/* The pill face and the blue flood are their own layers, so the CV page can
+   sit behind both. */
+.cv-download-button::before,
+.cv-download-button::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  background: var(--ink);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
+}
+
+.cv-download-button::before {
+  background: #f1efe6;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.12);
+}
+
+.cv-download-button::after {
+  background: var(--cv-blue);
+  /* A hair smaller than the chip, so no blue edge shows around it. */
+  clip-path: circle(
+    calc(var(--cv-chip) / 2 - 1px) at calc(100% - var(--cv-inset) - var(--cv-chip) / 2) 50%
+  );
+  transition: clip-path 560ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .cv-download-button.is-ready {
@@ -126,25 +145,26 @@ img {
 
 .cv-sheet {
   position: absolute;
-  top: 18%;
-  left: 18px;
+  top: 5px;
+  left: 20px;
   z-index: -2;
   display: flex;
   flex-direction: column;
   gap: 3px;
   box-sizing: border-box;
   width: 30px;
-  height: 38px;
+  /* Fully hidden behind the pill until it prints. */
+  height: calc(var(--bubble-size, 48px) - 12px);
   padding: 5px 5px 0;
   border-radius: 3px;
   background: #ffffff;
-  box-shadow: 0 2px 6px rgb(24 27 32 / 0.25);
+  box-shadow: 0 2px 6px rgb(24 27 32 / 0.22);
   transform: translateY(0) rotate(0deg);
   transition: transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .cv-sheet-title {
-  color: #1a55ff;
+  color: var(--cv-blue);
   font-family: var(--font-editorial), Georgia, serif;
   font-size: 9px;
   font-style: italic;
@@ -167,10 +187,9 @@ img {
   position: relative;
   display: inline-grid;
   font-family: var(--font-primary), Arial, sans-serif;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 .cv-download-default,
@@ -182,13 +201,6 @@ img {
 }
 
 .cv-download-done {
-  color: #8ee6a4;
-  font-family: var(--font-editorial), Georgia, serif;
-  font-size: 1rem;
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  text-transform: none;
   opacity: 0;
   transform: translateY(8px);
 }
@@ -202,10 +214,7 @@ img {
   flex: none;
   overflow: hidden;
   border-radius: 50%;
-  background: #1a55ff;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.3),
-    inset 0 -2px 4px rgb(6 26 120 / 0.35);
+  background: var(--cv-blue);
   color: #ffffff;
   transition: background-color 300ms ease;
 }
@@ -224,6 +233,14 @@ img {
   transform: scale(0.4) rotate(-20deg);
 }
 
+.cv-download-button:focus-visible {
+  color: #ffffff;
+}
+
+.cv-download-button:focus-visible::after {
+  clip-path: circle(150% at calc(100% - var(--cv-inset) - var(--cv-chip) / 2) 50%);
+}
+
 .cv-download-button:focus-visible .cv-sheet {
   transform: translateY(98%) rotate(6deg);
 }
@@ -233,6 +250,14 @@ img {
 }
 
 @media (hover: hover) and (pointer: fine) {
+  .cv-download-button:hover {
+    color: #ffffff;
+  }
+
+  .cv-download-button:hover::after {
+    clip-path: circle(150% at calc(100% - var(--cv-inset) - var(--cv-chip) / 2) 50%);
+  }
+
   .cv-download-button:hover .cv-sheet {
     transform: translateY(98%) rotate(6deg);
   }
@@ -242,7 +267,11 @@ img {
   }
 }
 
-/* Saved: the page drops back in, the chip turns green with a tick. */
+.cv-download-button:active {
+  transform: scale(0.97);
+}
+
+/* Saved: the page goes back in, the chip turns green with a tick. */
 .cv-download-button.is-saved .cv-sheet {
   transform: translateY(0) rotate(0deg);
   transition-duration: 260ms;
@@ -1581,16 +1610,17 @@ img {
 
 @media (max-width: 620px) {
   .cv-download-button {
-    gap: 9px;
-    padding: 0 5px 0 14px;
+    --cv-inset: 5px;
+    gap: 10px;
+    padding-left: 16px;
   }
 
   .cv-download-text {
-    font-size: 0.6rem;
+    font-size: 0.85rem;
   }
 
   .cv-sheet {
-    left: 12px;
+    left: 14px;
   }
 
   .hero-only {
@@ -1815,6 +1845,7 @@ img {
   .cv-sheet,
   .cv-download-chip,
   .cv-download-chip svg,
+  .cv-download-button::after,
   .bubble-menu .toggle-bubble.menu-btn {
     transition: none !important;
   }
