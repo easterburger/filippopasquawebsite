@@ -37,17 +37,8 @@ test("server-renders the hero-only portfolio", async () => {
   );
   assert.doesNotMatch(html, /FILIPPO/);
   assert.match(html, /IB student and software developer from Italy/);
+  assert.match(html, /introduction/i);
   assert.match(html, /explore/i);
-  // The desk: one heading, and a souvenir linking to every room.
-  assert.match(html, /<h1[^>]*id="hero-heading"/);
-  assert.match(html, /Ciao<\/span>, I’m/);
-  assert.match(html, />Filippo</);
-  assert.match(html, />Pasqua\.</);
-  assert.match(html, /aria-label="Pages"/);
-  for (const room of ["/experience", "/education", "/about", "/contact"]) {
-    assert.match(html, new RegExp(`class="desk-door[^"]*" href="${room}"`));
-  }
-  assert.doesNotMatch(html, /hello-board|swing-char|hero-cta|A QUICK INTRODUCTION/);
   // The intro gate server-renders its first greeting; the rest cycle client-side.
   assert.match(html, /class="intro-gate"/);
   assert.match(html, /<span lang="en">Hello<\/span>/);

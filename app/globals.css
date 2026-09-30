@@ -14,8 +14,7 @@
   --blue: #1266ff;
   --hairline: rgb(24 27 32 / 0.24);
   --color-arterial-red: var(--blue);
-  --site-cursor:
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="%23FFF" stroke="%23000" stroke-width="2" stroke-linejoin="round" d="M10 11V8.99c0-.88.59-1.64 1.44-1.86h.05A1.99 1.99 0 0 1 14 9.05V12v-2c0-.88.6-1.65 1.46-1.87h.05A1.98 1.98 0 0 1 18 10.06V13v-1.94a2 2 0 0 1 1.51-1.94h0A2 2 0 0 1 22 11.06V14c0 .6-.08 1.27-.21 1.97a7.96 7.96 0 0 1-7.55 6.48 54.98 54.98 0 0 1-4.48 0 7.96 7.96 0 0 1-7.55-6.48C2.08 15.27 2 14.59 2 14v-1.49c0-1.11.9-2.01 2.01-2.01h0a2 2 0 0 1 2.01 2.03l-.01.97v-10c0-1.1.9-2 2-2h0a2 2 0 0 1 2 2V11Z"></path></svg>'),
+  --site-cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="%23FFF" stroke="%23000" stroke-width="2" stroke-linejoin="round" d="M10 11V8.99c0-.88.59-1.64 1.44-1.86h.05A1.99 1.99 0 0 1 14 9.05V12v-2c0-.88.6-1.65 1.46-1.87h.05A1.98 1.98 0 0 1 18 10.06V13v-1.94a2 2 0 0 1 1.51-1.94h0A2 2 0 0 1 22 11.06V14c0 .6-.08 1.27-.21 1.97a7.96 7.96 0 0 1-7.55 6.48 54.98 54.98 0 0 1-4.48 0 7.96 7.96 0 0 1-7.55-6.48C2.08 15.27 2 14.59 2 14v-1.49c0-1.11.9-2.01 2.01-2.01h0a2 2 0 0 1 2.01 2.03l-.01.97v-10c0-1.1.9-2 2-2h0a2 2 0 0 1 2 2V11Z"></path></svg>'),
     auto;
 }
 
@@ -221,6 +220,248 @@ img {
   border: 1px solid var(--hairline);
 }
 
+.hero-content {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: clamp(112px, 16dvh, 170px) clamp(24px, 6vw, 96px)
+    clamp(52px, 8dvh, 90px);
+}
+
+.hero-intro {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(88vw, 1180px);
+  min-width: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  transition:
+    left 900ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hello-open .hero-intro {
+  left: 24%;
+  width: min(39vw, 570px);
+}
+
+.hero-intro-copy {
+  display: block;
+  width: 100%;
+  margin: 0;
+  color: #181b20;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: clamp(2.6rem, 5.2vw, 5.8rem);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
+  text-align: center;
+  cursor: default;
+  transition: font-size 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hello-open .hero-intro-copy {
+  justify-content: flex-start;
+  font-size: clamp(2rem, 3vw, 3.6rem);
+  text-align: left;
+}
+
+.swing-text .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Each sentence gets its own line, wrapped into even lengths so nothing is
+   left stranded on a line by itself. */
+.swing-line {
+  display: block;
+  text-wrap: balance;
+}
+
+.swing-word {
+  display: inline-block;
+  opacity: 0;
+}
+
+.swing-text.is-revealed .swing-word {
+  opacity: 1;
+  animation: swing-word-in 0.84s linear backwards;
+  animation-delay: calc(var(--word-index) * var(--word-delay));
+}
+
+/* Hung just below the top so a swing reads as a chime on a short string. */
+.swing-char {
+  display: inline-block;
+  transform-origin: 50% 6%;
+}
+
+@keyframes swing-word-in {
+  0% {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(50px);
+  }
+
+  50% {
+    opacity: 0.5;
+    filter: blur(5px);
+    transform: translateY(-5px);
+  }
+
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: fit-content;
+  margin: clamp(30px, 5dvh, 48px) auto 0;
+}
+
+.hello-open .hero-actions {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+/* Pill with a round icon chip. On hover the chip's colour floods out from the
+   chip itself across the whole button. */
+.hero-cta {
+  --cta-chip: 44px;
+  --cta-inset: 6px;
+  --cta-flood: #e9afb1;
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  min-height: calc(var(--cta-chip) + var(--cta-inset) * 2);
+  padding: var(--cta-inset) var(--cta-inset) var(--cta-inset) 24px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-primary), Arial, sans-serif;
+  font-size: 0.98rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 320ms ease,
+    background-color 0s,
+    transform 160ms ease;
+}
+
+.hero-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--cta-flood);
+  clip-path: circle(
+    calc(var(--cta-chip) / 2) at
+      calc(100% - var(--cta-inset) - var(--cta-chip) / 2) 50%
+  );
+  transition: clip-path 560ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-cta-primary {
+  --cta-flood: #e9afb1;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.hero-cta-secondary {
+  --cta-flood: #b7c5e8;
+  border-color: rgb(24 27 32 / 0.2);
+}
+
+.hero-cta-label {
+  position: relative;
+  white-space: nowrap;
+}
+
+.hero-cta-chip {
+  display: grid;
+  place-items: center;
+  width: var(--cta-chip);
+  height: var(--cta-chip);
+  flex: none;
+  border-radius: 50%;
+  background: var(--cta-flood);
+  color: var(--ink);
+}
+
+.hero-cta-chip svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-cta:hover {
+    color: var(--ink);
+    border-color: transparent;
+    /* Once the flood covers the pill, the pill takes its colour so the
+       anti-aliased corners stop showing the ink background through. */
+    background-color: var(--cta-flood);
+    transition:
+      color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 320ms ease,
+      background-color 0s 420ms,
+      transform 160ms ease;
+  }
+
+  .hero-cta:hover::before {
+    clip-path: circle(
+      150% at calc(100% - var(--cta-inset) - var(--cta-chip) / 2) 50%
+    );
+  }
+
+  .hero-cta-primary:hover .hero-cta-chip svg {
+    transform: rotate(90deg) scale(1.12);
+  }
+
+  .hero-cta-secondary:hover .hero-cta-chip svg {
+    transform: rotate(45deg);
+  }
+}
+
+.hero-cta:active {
+  transform: scale(0.97);
+}
+
+@media (min-width: 1600px) {
+  .hero-cta {
+    --cta-chip: 50px;
+    gap: 18px;
+    padding-left: 28px;
+    font-size: 1.08rem;
+  }
+}
+
+.hero-cta:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
 .intro-gate {
   position: fixed;
   inset: 0;
@@ -255,8 +496,7 @@ img {
 
 /* Playfair has no glyphs for these scripts, and synthetic italics on the
    fallback fonts look broken rather than editorial. */
-.intro-gate-greeting
-  :is(:lang(ja), :lang(ko), :lang(zh), :lang(hi), :lang(ar)) {
+.intro-gate-greeting :is(:lang(ja), :lang(ko), :lang(zh), :lang(hi), :lang(ar)) {
   font-style: normal;
   letter-spacing: 0;
 }
@@ -292,6 +532,173 @@ img {
   overflow: visible;
   fill: var(--ink);
   pointer-events: none;
+}
+
+.hero-action-melt {
+  position: absolute;
+  inset: 0;
+  filter: url(#melt-goo);
+  pointer-events: none;
+}
+
+/* Sized against the pointer's distance to the furthest corner so the fill needs
+   the whole animation to arrive, wherever the cursor entered. */
+.hero-action-melt-blob {
+  position: absolute;
+  top: var(--melt-y, 50%);
+  left: var(--melt-x, 50%);
+  display: block;
+  width: calc(var(--melt-reach, 90px) * var(--melt-span));
+  height: calc(var(--melt-reach, 90px) * var(--melt-span));
+  border-radius: var(--melt-shape);
+  background: var(--melt-fill, var(--paper));
+  transform: translate(calc(-50% + var(--melt-dx)), calc(-50% + var(--melt-dy)))
+    rotate(0deg) scale(0.02);
+  transition: transform calc(400ms * var(--melt-tempo, 1))
+    cubic-bezier(0.5, 0, 0.72, 0.24)
+    calc(var(--melt-out-delay) * var(--melt-tempo, 1));
+  will-change: transform;
+}
+
+/* One slow sweep, two trailing lobes that keep the edge churning, three quick
+   splash blobs so the puddle forms under the cursor right away. Every duration
+   below is scaled by --melt-tempo so each button can set its own speed. */
+.hero-action-melt-blob:nth-child(1) {
+  --melt-span: 2.6;
+  --melt-shape: 47% 53% 56% 44% / 53% 47% 53% 47%;
+  --melt-dx: 0px;
+  --melt-dy: 0px;
+  --melt-turn: 14deg;
+  --melt-scale-x: 1.04;
+  --melt-scale-y: 1.1;
+  --melt-in-duration: 1040ms;
+  --melt-in-ease: cubic-bezier(0.45, 0.06, 0.4, 0.96);
+  --melt-in-delay: 110ms;
+  --melt-out-delay: 0ms;
+}
+
+.hero-action-melt-blob:nth-child(2) {
+  --melt-span: 2.1;
+  --melt-shape: 58% 42% 39% 61% / 46% 63% 37% 54%;
+  --melt-dx: -16px;
+  --melt-dy: 6px;
+  --melt-turn: -30deg;
+  --melt-scale-x: 1.06;
+  --melt-scale-y: 1.12;
+  --melt-in-duration: 800ms;
+  --melt-in-ease: cubic-bezier(0.42, 0.1, 0.38, 0.97);
+  --melt-in-delay: 260ms;
+  --melt-out-delay: 40ms;
+}
+
+.hero-action-melt-blob:nth-child(3) {
+  --melt-span: 1.7;
+  --melt-shape: 38% 62% 57% 43% / 61% 41% 59% 39%;
+  --melt-dx: 19px;
+  --melt-dy: 12px;
+  --melt-turn: 34deg;
+  --melt-scale-x: 1.05;
+  --melt-scale-y: 1.16;
+  --melt-in-duration: 720ms;
+  --melt-in-ease: cubic-bezier(0.4, 0.12, 0.36, 0.98);
+  --melt-in-delay: 390ms;
+  --melt-out-delay: 80ms;
+}
+
+.hero-action-melt-blob:nth-child(4) {
+  --melt-span: 0.74;
+  --melt-shape: 62% 38% 44% 56% / 39% 58% 42% 61%;
+  --melt-dx: -14px;
+  --melt-dy: 9px;
+  --melt-turn: -46deg;
+  --melt-scale-x: 1.04;
+  --melt-scale-y: 1.14;
+  --melt-in-duration: 540ms;
+  --melt-in-ease: cubic-bezier(0.3, 0.78, 0.32, 1);
+  --melt-in-delay: 60ms;
+  --melt-out-delay: 120ms;
+}
+
+.hero-action-melt-blob:nth-child(5) {
+  --melt-span: 0.54;
+  --melt-shape: 44% 56% 63% 37% / 57% 43% 56% 44%;
+  --melt-dx: 15px;
+  --melt-dy: 11px;
+  --melt-turn: 52deg;
+  --melt-scale-x: 1.02;
+  --melt-scale-y: 1.18;
+  --melt-in-duration: 480ms;
+  --melt-in-ease: cubic-bezier(0.26, 0.82, 0.3, 1);
+  --melt-in-delay: 30ms;
+  --melt-out-delay: 150ms;
+}
+
+.hero-action-melt-blob:nth-child(6) {
+  --melt-span: 0.38;
+  --melt-shape: 56% 44% 37% 63% / 42% 59% 41% 58%;
+  --melt-dx: 3px;
+  --melt-dy: 19px;
+  --melt-turn: 74deg;
+  --melt-scale-x: 1;
+  --melt-scale-y: 1.2;
+  --melt-in-duration: 420ms;
+  --melt-in-ease: cubic-bezier(0.24, 0.84, 0.32, 1);
+  --melt-in-delay: 0ms;
+  --melt-out-delay: 180ms;
+}
+
+.melt-goo-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.particle-field {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.success-particle {
+  position: fixed;
+  display: block;
+  border-radius: 50%;
+  background: var(--ink);
+  pointer-events: none;
+}
+
+.hello-board-panel {
+  width: 100%;
+  min-width: 0;
+  pointer-events: auto;
+}
+
+.hello-board-anchor {
+  position: absolute;
+  top: 50%;
+  right: clamp(32px, 5vw, 92px);
+  width: min(52vw, 780px);
+  transform: translateY(-50%);
+}
+
+.hello-board {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.hello-board-kicker {
+  margin: 0;
+  color: rgb(24 27 32 / 0.62);
+  font-family: var(--font-primary), Arial, sans-serif;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-align: right;
 }
 
 .blur-text-segment {
@@ -920,6 +1327,67 @@ img {
     min-height: 100svh;
   }
 
+  .hero-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    height: auto;
+    min-height: 100svh;
+    padding:
+      calc(max(1.15em, env(safe-area-inset-top, 0px)) + 48px + 20px)
+      28px
+      max(52px, calc(env(safe-area-inset-bottom, 0px) + 72px))
+      28px;
+  }
+
+  .hero-intro {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: min(88vw, 760px);
+    transform: none;
+  }
+
+  .hero-intro-copy,
+  .hello-open .hero-intro-copy {
+    font-size: clamp(2.5rem, 7.4vw, 4.2rem);
+  }
+
+  .hero-content.hello-open {
+    justify-content: flex-start;
+    gap: 34px;
+  }
+
+  .hello-open .hero-intro {
+    left: auto;
+    width: min(86vw, 680px);
+  }
+
+  .hello-open .hero-intro-copy {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .hello-open .hero-actions {
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .hello-board-anchor {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: min(88vw, 680px);
+    transform: none;
+  }
+
+  .hello-board-kicker {
+    text-align: left;
+  }
+
   .contact-page,
   .contact-section {
     height: 100svh;
@@ -931,7 +1399,8 @@ img {
     flex-direction: column;
     align-items: center;
     height: 100%;
-    padding: calc(max(1.15em, env(safe-area-inset-top, 0px)) + 56px + 8px)
+    padding:
+      calc(max(1.15em, env(safe-area-inset-top, 0px)) + 56px + 8px)
       max(16px, env(safe-area-inset-right, 0px))
       max(16px, env(safe-area-inset-bottom, 0px))
       max(16px, env(safe-area-inset-left, 0px));
@@ -969,6 +1438,22 @@ img {
     transform: none;
   }
 
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
   .about-hero {
     height: 100svh;
     min-height: 100svh;
@@ -1004,9 +1489,69 @@ img {
     min-height: 100svh;
   }
 
+  .hero-content {
+    padding:
+      calc(max(1.15em, env(safe-area-inset-top, 0px)) + 48px + 16px)
+      18px
+      max(38px, calc(env(safe-area-inset-bottom, 0px) + 68px));
+  }
+
+  .hero-intro {
+    width: 92vw;
+  }
+
+  .hero-intro-copy,
+  .hello-open .hero-intro-copy {
+    font-size: clamp(2.2rem, 10.4vw, 3.2rem);
+    line-height: 1.02;
+  }
+
+  .hero-content.hello-open {
+    row-gap: 24px;
+  }
+
+  .hero-actions {
+    gap: 8px;
+    margin-top: 28px;
+  }
+
+  .hero-cta {
+    --cta-chip: 38px;
+    --cta-inset: 5px;
+    gap: 12px;
+    padding-left: 18px;
+    font-size: 0.92rem;
+  }
+
+  .hello-board-anchor {
+    width: 94vw;
+  }
+
   .contact-section {
     min-height: 100svh;
   }
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
 
   .contact-heading {
     font-size: clamp(2.55rem, 12.4vw, 3.6rem);
@@ -1121,11 +1666,27 @@ img {
   }
 }
 
+@media (max-height: 720px) and (min-width: 921px) {
+  .hero-content {
+    padding-top: 104px;
+    padding-bottom: 42px;
+  }
+
+  .hero-intro-copy {
+    font-size: clamp(2.4rem, 4.4vw, 4.6rem);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     scroll-behavior: auto !important;
+  }
+
+  .swing-word {
+    opacity: 1 !important;
+    animation: none !important;
   }
 
   .blur-text-segment {
@@ -1134,6 +1695,12 @@ img {
     transform: none !important;
   }
 
+  .hero-intro,
+  .hero-intro-copy,
+  .hero-cta,
+  .hero-cta::before,
+  .hero-cta-chip svg,
+  .hero-action-melt-blob,
   .cv-download-default,
   .cv-download-label::after,
   .cv-download-button,
@@ -1143,6 +1710,10 @@ img {
 
   .intro-gate-greeting {
     animation: none;
+  }
+
+  .success-particle {
+    display: none;
   }
 
   .contact-message-bubble {
@@ -2248,7 +2819,8 @@ img {
   padding: 1.1em 0.9em 0;
   background:
     linear-gradient(rgb(20 22 26 / 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(20 22 26 / 0.05) 1px, transparent 1px), #f4f5f8;
+    linear-gradient(90deg, rgb(20 22 26 / 0.05) 1px, transparent 1px),
+    #f4f5f8;
   background-size:
     1.35em 1.35em,
     1.35em 1.35em,
@@ -2481,7 +3053,8 @@ img {
   inset: 0;
   transform: translateZ(calc(var(--bd) / 2 - 1px));
   background:
-    linear-gradient(90deg, rgb(90 70 40 / 0.18), rgb(90 70 40 / 0) 8%), #f5efe0;
+    linear-gradient(90deg, rgb(90 70 40 / 0.18), rgb(90 70 40 / 0) 8%),
+    #f5efe0;
   border-radius: 0 6px 6px 0;
   box-shadow: 0 1.4em 3em rgb(10 8 4 / 0.3);
   overflow: hidden;
@@ -2512,14 +3085,16 @@ img {
 .openbook-turn-front {
   border-radius: 0 6px 6px 0;
   background:
-    linear-gradient(90deg, rgb(90 70 40 / 0.16), rgb(90 70 40 / 0) 8%), #f5efe0;
+    linear-gradient(90deg, rgb(90 70 40 / 0.16), rgb(90 70 40 / 0) 8%),
+    #f5efe0;
 }
 
 .openbook-turn-back {
   transform: rotateY(180deg);
   border-radius: 6px 0 0 6px;
   background:
-    linear-gradient(270deg, rgb(90 70 40 / 0.14), rgb(90 70 40 / 0) 9%), #f2ecdc;
+    linear-gradient(270deg, rgb(90 70 40 / 0.14), rgb(90 70 40 / 0) 9%),
+    #f2ecdc;
 }
 
 .openbook-turn-shade {
@@ -2579,7 +3154,8 @@ img {
   border-radius: 6px 0 0 6px;
   overflow: hidden;
   background:
-    linear-gradient(270deg, rgb(90 70 40 / 0.16), rgb(90 70 40 / 0) 9%), #f2ecdc;
+    linear-gradient(270deg, rgb(90 70 40 / 0.16), rgb(90 70 40 / 0) 9%),
+    #f2ecdc;
   box-shadow: 0 1.4em 3em rgb(10 8 4 / 0.22);
 }
 
@@ -2850,16 +3426,7 @@ img {
   width: 0.38em;
   height: 0.38em;
   background: rgb(33 31 28 / 0.45);
-  clip-path: polygon(
-    50% 0,
-    62% 38%,
-    100% 50%,
-    62% 62%,
-    50% 100%,
-    38% 62%,
-    0 50%,
-    38% 38%
-  );
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
 }
 
 .bookpage-plate {
@@ -3107,6 +3674,24 @@ img {
 
 /* Phone: compact, touch-first, intentionally scrollable. */
 @media (max-width: 640px) {
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
   /* Touch: skip hover-scale feel; tap targets stay clear. */
   .book3d-slot {
     width: calc(var(--bd) * var(--shelf-scale) + 18px);

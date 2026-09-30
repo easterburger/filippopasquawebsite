@@ -14,8 +14,6 @@ import { gsap } from "gsap";
 
 type TransitionToOptions = {
   alreadyCovered?: boolean;
-  /** Curtain colour for this one transition (the room you are walking into). */
-  color?: string;
 };
 
 type PageTransitionContextValue = {
@@ -62,7 +60,7 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
   const pendingHashRef = useRef<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  const cover = useCallback((alreadyCovered = false, color?: string) => {
+  const cover = useCallback((alreadyCovered = false) => {
     return new Promise<void>((resolve) => {
       const curtain = curtainRef.current;
       const overlay = overlayRef.current;
@@ -70,8 +68,6 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
         resolve();
         return;
       }
-
-      curtain.style.backgroundColor = color ?? "";
 
       gsap.killTweensOf(curtain);
       gsap.set(overlay, { display: "block", pointerEvents: "auto" });
@@ -114,8 +110,6 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
       const finish = () => {
         gsap.set(overlay, { display: "none", pointerEvents: "none" });
         gsap.set(curtain, { scaleY: 0, autoAlpha: 0 });
-        // Back to ink for the next, ordinary transition.
-        curtain.style.backgroundColor = "";
         setIsVisible(false);
         resolve();
       };
@@ -157,7 +151,7 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
       pendingRevealRef.current = true;
       pendingHashRef.current = target.hash || null;
 
-      void cover(options.alreadyCovered, options.color)
+      void cover(options.alreadyCovered)
         .then(() => {
           router.push(`${target.pathname}${target.search}${target.hash}`);
         })
