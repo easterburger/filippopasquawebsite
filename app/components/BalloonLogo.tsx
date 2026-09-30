@@ -12,23 +12,16 @@ import { useRef, type MouseEvent as ReactMouseEvent } from "react";
 
 import "./balloon-logo.css";
 
-// Filippo's initials as two foil letter balloons floating in the top-left
-// corner of the home page (a generated photo, cut out; the same image makes
-// the favicons through scripts/build-favicons.mjs). It can be grabbed and
-// dragged anywhere on the screen: it leans into the direction it is pulled,
-// like a balloon on a string, and stays where it is let go. A click without a
-// drag goes back to the top.
+// Filippo's initials as two foil letter balloons in the top-left corner of
+// the home page (a generated photo, cut out; the same image makes the
+// favicons through scripts/build-favicons.mjs). It sits still until it is
+// grabbed: it can be dragged anywhere on the screen, leans into the direction
+// it is pulled like a balloon on a string, and stays where it is let go. A
+// click without a drag goes back to the top.
 
 /** Degrees of lean per px/s of drag speed, and the most it will lean. */
 const LEAN = 0.018;
 const MAX_LEAN = 24;
-
-/*
- * The balloon turns around its vertical axis. There is no 3D model: Codex
- * generated the same balloon from four angles (0, 30, 60 and 90 degrees), and
- * the CSS steps through those views every 30 degrees, mirrored for the far
- * half of the turn, with a small real 3D tilt in between (balloon-logo.css).
- */
 
 export default function BalloonLogo({ ready }: { ready: boolean }) {
   const reduceMotion = useReducedMotion();
@@ -79,9 +72,14 @@ export default function BalloonLogo({ ready }: { ready: boolean }) {
           <svg className="balloon-string" viewBox="0 0 20 64" preserveAspectRatio="none">
             <path d="M10 0 C 4 14, 16 26, 10 38 S 5 54, 11 64" />
           </svg>
-          <span className="balloon-turn">
-            <span className="balloon-frame" />
-          </span>
+          <img
+            className="balloon-art"
+            src="/hero-assets/fp-balloon.webp"
+            alt=""
+            width={440}
+            height={440}
+            draggable={false}
+          />
         </motion.span>
       </motion.a>
     </>

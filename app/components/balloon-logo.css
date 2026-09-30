@@ -1,5 +1,5 @@
-/* The FP balloon in the top-left corner: it bobs on its string, can be
-   dragged anywhere on screen, and bounces when pointed at. */
+/* The FP balloon in the top-left corner: it sits still on its string until
+   it is dragged somewhere else on the screen. */
 
 /* What the balloon may be dragged within: the viewport, less a margin. */
 .balloon-bounds {
@@ -33,9 +33,7 @@
 
 /* Rises into place once, separately from the drag transform. */
 .balloon-logo.is-ready .balloon-float {
-  animation:
-    balloon-rise 900ms cubic-bezier(0.34, 1.56, 0.64, 1) both,
-    balloon-bob 4.2s ease-in-out 900ms infinite;
+  animation: balloon-rise 900ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 @keyframes balloon-rise {
@@ -65,95 +63,13 @@
   perspective: 700px;
 }
 
-/* Turning around the vertical axis. .balloon-frame steps through the four
-   photographed angles every 30 degrees (mirrored for the far half of the
-   turn); .balloon-turn tilts each view from -15 to +15 degrees in real 3D in
-   the meantime, so the turn reads as continuous. Both run on the same clock:
-   one step of the sprite is exactly one tilt cycle. */
-.balloon-turn {
-  --turn: 12s;
-  position: relative;
-  display: block;
-  transform-style: preserve-3d;
-  animation: balloon-tilt calc(var(--turn) / 12) linear infinite;
-}
-
-.balloon-frame {
+.balloon-art {
   display: block;
   width: 100%;
-  aspect-ratio: 1;
-  background: url("/hero-assets/fp-balloon-turn.webp") 0 0 / 400% 100% no-repeat;
+  height: auto;
   filter: drop-shadow(0 10px 14px rgb(10 30 110 / 0.22));
-  animation: balloon-frames var(--turn) step-end infinite;
-}
-
-@keyframes balloon-tilt {
-  from {
-    transform: rotateY(-15deg);
-  }
-
-  to {
-    transform: rotateY(15deg);
-  }
-}
-
-/* 0, 30, 60, 90, then back through the views mirrored (120 to 270), then the
-   near side again (300, 330). */
-@keyframes balloon-frames {
-  0% {
-    background-position: 0% 0;
-    transform: none;
-  }
-
-  8.333% {
-    background-position: 33.333% 0;
-  }
-
-  16.667% {
-    background-position: 66.667% 0;
-  }
-
-  25% {
-    background-position: 100% 0;
-  }
-
-  33.333% {
-    background-position: 66.667% 0;
-    transform: scaleX(-1);
-  }
-
-  41.667% {
-    background-position: 33.333% 0;
-  }
-
-  50% {
-    background-position: 0% 0;
-  }
-
-  58.333% {
-    background-position: 33.333% 0;
-  }
-
-  66.667% {
-    background-position: 66.667% 0;
-  }
-
-  75% {
-    background-position: 100% 0;
-  }
-
-  83.333% {
-    background-position: 66.667% 0;
-    transform: none;
-  }
-
-  91.667% {
-    background-position: 33.333% 0;
-  }
-
-  100% {
-    background-position: 0% 0;
-  }
+  pointer-events: none;
+  -webkit-user-drag: none;
 }
 
 /* The string hangs from the bottom of the F. */
@@ -169,7 +85,6 @@
   stroke-linecap: round;
   stroke-width: 1.2px;
   transform-origin: 50% 0;
-  animation: balloon-string 4.2s ease-in-out infinite;
 }
 
 .balloon-string path {
@@ -186,30 +101,6 @@
   transition: scale 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Uses the individual translate property, so it never fights the lean
-   (which motion sets through transform). */
-@keyframes balloon-bob {
-  0%,
-  100% {
-    translate: 0 0;
-  }
-
-  50% {
-    translate: 0 -7px;
-  }
-}
-
-@keyframes balloon-string {
-  0%,
-  100% {
-    transform: rotate(4deg);
-  }
-
-  50% {
-    transform: rotate(-5deg);
-  }
-}
-
 @media (max-width: 620px) {
   .balloon-logo {
     top: max(10px, calc(env(safe-area-inset-top, 0px) + 4px));
@@ -220,10 +111,7 @@
 
 @media (prefers-reduced-motion: reduce) {
 
-  .balloon-logo.is-ready .balloon-float,
-  .balloon-string,
-  .balloon-turn,
-  .balloon-frame {
+  .balloon-logo.is-ready .balloon-float {
     animation: none;
   }
 }
