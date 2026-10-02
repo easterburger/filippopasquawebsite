@@ -76,10 +76,12 @@
   position: absolute;
   bottom: 0;
   left: 50%;
-  translate: -50% 0;
   opacity: 0;
   filter: blur(10px);
-  transform: scale(0.94);
+  /* Centring lives in transform, not translate: the production CSS minifier
+     drops a translate that shares a rule with transform. */
+  transform: translateX(-50%) scale(0.94);
+  transform-origin: 50% 100%;
   pointer-events: none;
   transition:
     opacity 160ms ease,
@@ -94,7 +96,7 @@
 .radio-layer[data-active="true"] {
   opacity: 1;
   filter: none;
-  transform: none;
+  transform: translateX(-50%);
   pointer-events: auto;
   transition-delay: 110ms;
   transition-duration: 280ms, 320ms, 480ms;
