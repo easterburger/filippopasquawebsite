@@ -178,7 +178,7 @@ export default function PortfolioPage() {
                 className="hero-intro-copy"
                 revealed={hasEntered}
                 onRevealComplete={handleIntroComplete}
-                marks={heroMarks({ autoStickers: hasEntered })}
+                marks={heroMarks()}
                 breeze
               />
 

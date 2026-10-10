@@ -8,10 +8,12 @@ import {
   useState,
   useSyncExternalStore,
   type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
 
+import { usePageTransition } from "../PageTransition";
 import type { SwingMark } from "../SwingText";
 
 import "./hero-marks.css";
@@ -197,56 +199,61 @@ function Abbreviation({ children }: { children: ReactNode }) {
   );
 }
 
-const STICKERS = [
-  { src: "/hero-stickers/dawn-icon.webp", className: "is-square", x: "-16%", y: "-118%", r: -12 },
-  { src: "/hero-stickers/skycloud-icon.webp", className: "is-square", x: "18%", y: "-150%", r: 7 },
-  { src: "/hero-stickers/tuttobene-icon.webp", className: "is-square is-cover", x: "52%", y: "-136%", r: 14 },
-  { src: "/hero-stickers/zayno.png", className: "is-wide", x: "80%", y: "-98%", r: -8 },
+/** His apps, each opening its record in the Experience crate. */
+const PROJECTS = [
+  { name: "Dawn", href: "/experience#dawn", src: "/hero-stickers/dawn-icon.webp", className: "is-square", r: -6 },
+  { name: "SkyCloud", href: "/experience#skycloud", src: "/hero-stickers/skycloud-icon.webp", className: "is-square", r: 4 },
+  { name: "Tutto Bene", href: "/experience#bds", src: "/hero-stickers/tuttobene-icon.webp", className: "is-square is-cover", r: -3 },
+  { name: "Zayno", href: "/experience#zayno", src: "/hero-stickers/zayno.png", className: "is-wide", r: 6 },
 ] as const;
 
 /**
  * "software developer" selected like text in an editor, with a blinking caret.
- * Hovering (or tapping) pops the apps he has built around it.
+ * Hovering (or tapping) lines his apps up just under the phrase, clear of the
+ * sentence; each one opens that project. They are a mouse shortcut: the same
+ * projects are a menu away for keyboards and screen readers, so they stay out
+ * of the (already aria-hidden) headline's tab order.
  */
-function Selection({ children, auto }: { children: ReactNode; auto: boolean }) {
+function Selection({ children }: { children: ReactNode }) {
   const client = useClient();
-  const { ref, open: peeking, handlers } = usePeek();
-  const [intro, setIntro] = useState(false);
-  const open = peeking || intro;
+  const { ref, open, handlers } = usePeek();
+  const { transitionTo } = usePageTransition();
 
-  // One unprompted pop after the headline lands, so people find it.
-  useEffect(() => {
-    if (!auto) return;
-    const show = window.setTimeout(() => setIntro(true), 2900);
-    const hide = window.setTimeout(() => setIntro(false), 4700);
-    return () => {
-      window.clearTimeout(show);
-      window.clearTimeout(hide);
-    };
-  }, [auto]);
+  const go = (event: ReactMouseEvent<HTMLAnchorElement>, href: string) => {
+    // Let new-tab clicks through; otherwise use the site's page transition.
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+    event.preventDefault();
+    transitionTo(href);
+  };
 
   return (
     <span ref={ref} className={`hero-mark hero-select${open ? " is-open" : ""}`} {...handlers}>
       <span className="hero-select-box" aria-hidden="true" />
       {children}
       <span className="hero-caret" aria-hidden="true" />
-      <span className="hero-stickers" aria-hidden="true">
-        {STICKERS.map((sticker, index) => (
-          <span
-            key={sticker.src}
-            className={`hero-sticker ${sticker.className}`}
-            style={
-              {
-                "--x": sticker.x,
-                "--y": sticker.y,
-                "--r": `${sticker.r}deg`,
-                "--i": index,
-              } as CSSProperties
-            }
+      {/* A tap on an app follows its link instead of toggling the dock shut. */}
+      <span
+        className="hero-stickers"
+        aria-hidden="true"
+        onPointerUp={(event) => event.stopPropagation()}
+      >
+        <span className="hero-dock">
+        {PROJECTS.map((project, index) => (
+          <a
+            key={project.href}
+            href={project.href}
+            tabIndex={-1}
+            className={`hero-sticker ${project.className}`}
+            style={{ "--r": `${project.r}deg`, "--i": index } as CSSProperties}
+            onClick={(event) => go(event, project.href)}
           >
-            {client ? <img src={sticker.src} alt="" /> : null}
-          </span>
+            <span className="hero-sticker-art">
+              {client ? <img src={project.src} alt="" /> : null}
+            </span>
+            <span className="hero-sticker-name">{project.name}</span>
+          </a>
         ))}
+        </span>
       </span>
     </span>
   );
@@ -269,14 +276,14 @@ function Flag({ children }: { children: ReactNode }) {
   );
 }
 
-export function heroMarks({ autoStickers }: { autoStickers: boolean }): SwingMark[] {
+export function heroMarks(): SwingMark[] {
   return [
     { words: "Hi,", render: (words) => <WavingHi>{words}</WavingHi> },
     { words: "Filippo Pasqua.", render: (words) => <AccountBadge>{words}</AccountBadge> },
     { words: "IB", render: (words) => <Abbreviation>{words}</Abbreviation> },
     {
       words: "software developer",
-      render: (words) => <Selection auto={autoStickers}>{words}</Selection>,
+      render: (words) => <Selection>{words}</Selection>,
     },
     { words: "Italy.", render: (words) => <Flag>{words}</Flag> },
   ];
