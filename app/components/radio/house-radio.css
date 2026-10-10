@@ -36,6 +36,62 @@
   translate: -50% 0;
 }
 
+/* Off: out of sight until the corner button calls it up. */
+.house-radio.is-ready[data-view="idle"] {
+  opacity: 0;
+  pointer-events: none;
+  translate: -50% 22px;
+}
+
+/* The corner button: a twin of the sound button, stacked above it. */
+.radio-trigger {
+  position: fixed;
+  bottom: calc(max(2em, calc(env(safe-area-inset-bottom, 0px) + 1em)) + 54px);
+  left: max(2em, calc(env(safe-area-inset-left, 0px) + 1em));
+  z-index: 98;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.14);
+  /* The sound button's size, so its em-based offsets line up with ours. */
+  font-size: 0.78rem;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px) scale(0.9);
+  transition:
+    opacity 300ms ease,
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms ease;
+}
+
+.radio-trigger.is-shown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+.radio-trigger.is-shown:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgb(0 0 0 / 0.18);
+}
+
+.radio-trigger svg {
+  width: 19px;
+  height: 19px;
+}
+
+.radio-trigger:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
 .radio-sr {
   position: absolute;
   width: 1px;
@@ -1221,11 +1277,6 @@ body:has(.house-radio:not([data-view="idle"])) .hero-page .hello-open .hello-boa
 @media (max-width: 920px) {
   .hero-page .hero-content {
     transition: padding-bottom 700ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  /* Room for the small radio itself. */
-  body:has(.house-radio) .hero-page .hero-content {
-    padding-bottom: calc(146px + env(safe-area-inset-bottom, 0px));
   }
 
   body:has(.house-radio:not([data-view="idle"])) .hero-page .hero-content {

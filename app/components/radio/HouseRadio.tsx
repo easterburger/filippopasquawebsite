@@ -7,6 +7,7 @@ import {
   Pause,
   Play,
   Power,
+  Radio,
   SkipBack,
   SkipForward,
   SpeakerHigh,
@@ -156,6 +157,7 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
   const frameRef = useRef<HTMLDivElement>(null);
   const screenRef = useRef<HTMLDivElement>(null);
   const faceRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const livePlayRef = useRef<HTMLButtonElement>(null);
   const openPlayRef = useRef<HTMLButtonElement>(null);
   const stationRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -269,7 +271,7 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
     focusAfterRef.current = null;
     if (!target) return;
     const element =
-      target === "face" ? faceRef.current : target === "live" ? livePlayRef.current : openPlayRef.current;
+      target === "face" ? triggerRef.current : target === "live" ? livePlayRef.current : openPlayRef.current;
     element?.focus({ preventScroll: true });
   }, [view]);
 
@@ -582,7 +584,8 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
     if (status === "unavailable") failuresRef.current = 0;
     closingRef.current = false;
     wantPlayRef.current = true;
-    if (document.activeElement === faceRef.current) focusAfterRef.current = "open";
+    const from = document.activeElement;
+    if (from === faceRef.current || from === triggerRef.current) focusAfterRef.current = "open";
     go("open");
     setStatus("tuning");
     ensurePlayer();
@@ -789,13 +792,27 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
   const PlayIcon = showsPause ? Pause : Play;
 
   return (
+    <>
+    {/* Off, the radio keeps out of the way: just a small button in the corner. */}
+    <button
+      ref={triggerRef}
+      type="button"
+      className={`radio-trigger${ready && view === "idle" && !menuOpen ? " is-shown" : ""}`}
+      aria-label="Show the radio"
+      title="FP FM radio"
+      tabIndex={ready && view === "idle" ? 0 : -1}
+      onClick={turnOn}
+    >
+      <Radio weight="bold" aria-hidden="true" />
+    </button>
+
     <div
       ref={rootRef}
       className={`house-radio${ready ? " is-ready" : ""}${volumeFixed ? " is-volume-fixed" : ""}`}
       data-view={view}
       data-status={status}
       data-settling={settling}
-      inert={!ready || menuOpen}
+      inert={!ready || menuOpen || view === "idle"}
       onBlur={(event) => {
         // Tabbing out of the open radio folds it, so focus never sits on
         // the page it covers.
@@ -1141,5 +1158,6 @@ export default function HouseRadio({ ready }: { ready: boolean }) {
         {announcement}
       </p>
     </div>
+    </>
   );
 }
