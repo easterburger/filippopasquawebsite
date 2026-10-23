@@ -13,7 +13,6 @@ import { useCursorEffectsAvailable, useCursorMode } from "./cursor-mode";
 import IntroGate from "./IntroGate";
 import { INTRO_GATE_KEY } from "./intro-seen";
 import ParticleButton from "./ParticleButton";
-import HouseRadio from "./radio/HouseRadio";
 import StyleNote from "./StyleNote";
 import SwingText from "./SwingText";
 import { heroMarks } from "./hero/HeroMarks";
@@ -133,8 +132,6 @@ export default function PortfolioPage() {
         <BalloonLogo ready={chromeReady} />
 
         <StyleNote ready={chromeReady} />
-
-        <HouseRadio ready={chromeReady} />
 
         <section id="home" className="hero-only" aria-labelledby="hero-intro">
           <AnimatePresence>
