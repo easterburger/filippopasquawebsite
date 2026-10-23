@@ -1,10 +1,8 @@
 "use client";
 
-import { ArrowDown, ArrowUpRight, Check, Sparkle, X } from "@phosphor-icons/react";
+import { ArrowDown, ArrowUpRight, Check } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "motion/react";
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
-
-import TextFlippingBoardDemo from "@/components/text-flipping-board-demo";
 
 import BalloonLogo from "./BalloonLogo";
 import BubbleMenu from "./BubbleMenu";
@@ -12,7 +10,6 @@ import CursorSwitch from "./CursorSwitch";
 import { useCursorEffectsAvailable, useCursorMode } from "./cursor-mode";
 import IntroGate from "./IntroGate";
 import { INTRO_GATE_KEY } from "./intro-seen";
-import ParticleButton from "./ParticleButton";
 import StyleNote from "./StyleNote";
 import SwingText from "./SwingText";
 import { heroMarks } from "./hero/HeroMarks";
@@ -30,7 +27,6 @@ const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export default function PortfolioPage() {
-  const [isHelloOpen, setIsHelloOpen] = useState(false);
   const [menuOpenRequest, setMenuOpenRequest] = useState(0);
   const [chromeReady, setChromeReady] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
@@ -166,7 +162,7 @@ export default function PortfolioPage() {
             )}
           </AnimatePresence>
 
-          <div className={`hero-content${isHelloOpen ? " hello-open" : ""}`}>
+          <div className="hero-content">
             <div id="hero-intro" className="hero-intro">
               {cursorEffectsAvailable && <CursorSwitch ready={chromeReady} />}
 
@@ -189,23 +185,6 @@ export default function PortfolioPage() {
                 }
                 transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
               >
-                <ParticleButton
-                  type="button"
-                  className="hero-cta hero-cta-primary"
-                  onClick={() => setIsHelloOpen((isOpen) => !isOpen)}
-                  aria-expanded={isHelloOpen}
-                  aria-controls="hello-board-panel"
-                >
-                  <span className="hero-cta-label">Introduction</span>
-                  <span className="hero-cta-chip" aria-hidden="true">
-                    {isHelloOpen ? (
-                      <X weight="bold" />
-                    ) : (
-                      <Sparkle weight="fill" />
-                    )}
-                  </span>
-                </ParticleButton>
-
                 <button
                   type="button"
                   className="hero-cta hero-cta-secondary"
@@ -218,26 +197,6 @@ export default function PortfolioPage() {
                   </span>
                 </button>
               </motion.div>
-            </div>
-
-            <div className="hello-board-anchor">
-              <AnimatePresence initial={false}>
-                {isHelloOpen && (
-                  <motion.aside
-                    id="hello-board-panel"
-                    className="hello-board-panel"
-                    initial={{ opacity: 0, x: 90, filter: "blur(22px)" }}
-                    animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                    exit={{ opacity: 0, x: 70, filter: "blur(18px)" }}
-                    transition={{
-                      duration: 0.72,
-                      ease: [0.16, 1, 0.3, 1],
-                    }}
-                  >
-                    <TextFlippingBoardDemo />
-                  </motion.aside>
-                )}
-              </AnimatePresence>
             </div>
           </div>
         </section>
