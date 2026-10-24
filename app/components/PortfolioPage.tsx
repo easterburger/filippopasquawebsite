@@ -8,18 +8,15 @@ import BalloonLogo from "./BalloonLogo";
 import BubbleMenu from "./BubbleMenu";
 import CursorSwitch from "./CursorSwitch";
 import { useCursorEffectsAvailable, useCursorMode } from "./cursor-mode";
+import HeroName from "./HeroName";
 import IntroGate from "./IntroGate";
 import { INTRO_GATE_KEY } from "./intro-seen";
 import StyleNote from "./StyleNote";
-import SwingText from "./SwingText";
-import { heroMarks } from "./hero/HeroMarks";
 import { portfolioMenuItems } from "./portfolio-menu";
 
 // WebGL and ogl only load for visitors who pick the ripples.
 const RippleDistortion = lazy(() => import("./RippleDistortion"));
 
-const HERO_INTRO =
-  "Hi, I'm Filippo Pasqua.\nI'm an IB student and software developer from Italy.";
 
 // The gate must disappear before paint for returning visitors, but useLayoutEffect
 // is a no-op (and warns) during SSR.
@@ -61,7 +58,8 @@ export default function PortfolioPage() {
   useEffect(() => {
     if (!hasEntered) return;
 
-    const timeout = window.setTimeout(() => setChromeReady(true), 4200);
+    // The rest of the page arrives once the name has melted in.
+    const timeout = window.setTimeout(() => setChromeReady(true), 1100);
     return () => window.clearTimeout(timeout);
   }, [hasEntered]);
 
@@ -73,8 +71,6 @@ export default function PortfolioPage() {
     }
     setHasEntered(true);
   };
-
-  const handleIntroComplete = () => setChromeReady(true);
 
   return (
     <>
@@ -129,7 +125,7 @@ export default function PortfolioPage() {
 
         <StyleNote ready={chromeReady} />
 
-        <section id="home" className="hero-only" aria-labelledby="hero-intro">
+        <section id="home" className="hero-only" aria-labelledby="hero-name">
           <AnimatePresence>
             {showRipples && (
               <motion.div
@@ -166,14 +162,7 @@ export default function PortfolioPage() {
             <div id="hero-intro" className="hero-intro">
               {cursorEffectsAvailable && <CursorSwitch ready={chromeReady} />}
 
-              <SwingText
-                text={HERO_INTRO}
-                className="hero-intro-copy"
-                revealed={hasEntered}
-                onRevealComplete={handleIntroComplete}
-                marks={heroMarks()}
-                breeze
-              />
+              <HeroName revealed={hasEntered} />
 
               <motion.div
                 className="hero-actions"

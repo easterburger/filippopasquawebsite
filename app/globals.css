@@ -3929,3 +3929,29 @@ img {
     -webkit-backdrop-filter: none;
   }
 }
+
+/* ══ Heat word ═════════════════════════════════════════════ */
+.heat {
+  position: relative;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.heat[data-cycle="false"] {
+  cursor: inherit;
+}
+
+.heat-canvas {
+  display: block;
+}
+
+/* The home page's name: as wide as the hero allows, set on its arc. */
+.hero-name {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 0;
+}
