@@ -37,7 +37,8 @@ test("server-renders the hero-only portfolio", async () => {
   );
   assert.doesNotMatch(html, /FILIPPO/);
   assert.match(html, /IB student and software developer from Italy/);
-  assert.match(html, /introduction/i);
+  // The home page is the name now; the canvas draws it, the heading carries it.
+  assert.match(html, /<h1 id="hero-name"[^>]*>Filippo Pasqua<\/h1>/);
   assert.match(html, /explore/i);
   // The intro gate server-renders its first greeting; the rest cycle client-side.
   assert.match(html, /class="intro-gate"/);
